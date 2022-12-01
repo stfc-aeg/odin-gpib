@@ -194,7 +194,7 @@ class GpibManager():
         self.background_task_enable = False
 
     @run_on_executor
-    def background_task(self):
+    def background_task(self):        
         """ Runs the update function of all the loaded devices """
 
         while self.background_task_enable:

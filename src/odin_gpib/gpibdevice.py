@@ -17,13 +17,14 @@ class GpibDevice():
         return f'{self.ident}, at addr {self.device.primary_address}'
 
     def device_id(self):
-        print("Printing from the GpibDevice class inside gpibdevice.py")
+        #print("Printing from the GpibDevice class inside gpibdevice.py")
+        pass
 
     def update(self):
         pass
 
     def write(self, cmd):
-        print(self.device,"inside device.py", + self.device_control_enable)
+        #print(self.device,"inside device.py", + self.device_control_enable)
         if self.device_control_enable:  
             with self.lock:
                 ret = self.device.write(cmd)
@@ -34,14 +35,14 @@ class GpibDevice():
                 return ret 
 
     def query(self, cmd):
-        print(self.device,"inside device.py", + self.device_control_enable)
+        #print(self.device,"inside device.py", + self.device_control_enable)
         if self.device_control_enable:
             with self.lock:
                 ret = self.device.query(cmd)
                 return ret
 
     def query_ascii_values(self, cmd):
-        print(self.device,"inside device.py", + self.device_control_enable)
+        #print(self.device,"inside device.py", + self.device_control_enable)
         if self.device_control_enable:            
             with self.lock:
                 ret = self.device.query_ascii_values(cmd)
