@@ -30,7 +30,7 @@ class K2410(GpibDevice):
         
         print("OUTPUT: ",self.output_state)
 
-        self.device_control_enable = True       
+        self.device_control_enable = True  
 
         self.filter_set_enable = ""
         self.filter_set_type = ""
@@ -49,6 +49,7 @@ class K2410(GpibDevice):
         self.current_comp_setpoint = 0.0
         self.current_meas = 0.0
         self.current_curr_comp = 0.0
+        self.current_meas_pow = 1
         
         filter_controls = ParameterTree({
             'filter_enable' : (lambda: self.filter_set_enable, self.set_filter_enable),
@@ -71,7 +72,8 @@ class K2410(GpibDevice):
         current_controls = ParameterTree({
             'current_measurement' : (lambda: self.current_meas, None),
             'current_curr_comp' : (lambda: self.current_curr_comp, None),
-            'current_comp_set' : (lambda : self.current_comp_setpoint, self.set_current_comp)
+            'current_comp_set' : (lambda : self.current_comp_setpoint, self.set_current_comp),
+            'current_meas_pow' : (lambda : self.current_meas_pow, self.set_current_meas_pow)
         })
 
         self.param_tree = ParameterTree({
@@ -84,6 +86,9 @@ class K2410(GpibDevice):
             'voltage': voltage_controls,
             'current': current_controls
             })
+
+    def set_current_meas_pow(self, power):
+        self.current_meas_pow = power
 
     def set_time(self, time):
         self.voltage_time = time
@@ -177,10 +182,7 @@ class K2410(GpibDevice):
 
     def update(self):
         self.get_output_state()
-        print("Updating output state")
-        print(self.output_state)
-        if (self.output_state) and (self.device_control_enable): 
-            print("Updating values")         
+        if (self.output_state) and (self.device_control_enable):        
             self.get_filter_state()
             self.get_filter_curr_count()
             self.get_filter_curr_type()
@@ -196,10 +198,9 @@ class K2410(GpibDevice):
 
         volt_measurement = self.voltage_meas
         setpoint = float(voltage_setpoint)
-
         increment = (float("{:.2f}".format((setpoint-volt_measurement)/(self.voltage_time))))
-
         count = 0
+
         if increment < 0:
             count = volt_measurement
             while (count > setpoint):

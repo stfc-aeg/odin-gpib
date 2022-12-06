@@ -112,12 +112,7 @@ class K2510(GpibDevice):
         self.device_control_enable = device_control_enable
         if (self.device_control_enable == False):
             self.write(':SYSTEM:KEY 16')
-    
-    def get_idn(self):
-        #print(self.device.query('*IDN?'),"Sent from keithley2510.py")
-        #print(self.device, "from k2510")
-        pass
-    
+
     def update(self):
         if self.device_control_enable:
             self.get_output_state()
@@ -126,4 +121,3 @@ class K2510(GpibDevice):
             self.get_tec_power()
             self.get_tec_temp_meas()
             self.get_tec_setpoint()
-            self.get_idn()

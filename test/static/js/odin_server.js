@@ -2,6 +2,7 @@ api_version = '0.1';
 id_list = [];
 K2410_devices = [];
 K2510_devices = [];
+var up_i = 0;
 
 //runs when the script is loaded
 $( document ).ready(function() {
@@ -101,46 +102,32 @@ function create_K2410_interfaces(){
         <tbody>
             <tr>
                 <th> Filter state: </th>
-                <td> <span id="filt-state-${id}"></span></td>
-            </tr>
-            <tr>
-                <th> Selected filter type: </th>
-                <td> <span id="filt-curr-type-${id}"></span></td>
-            </tr>
-            <tr>
-                <th> Selected filter length: </th>
-                <td> <span id="filt-curr-count-${id}"></span> values stored for filter</td>
-            </tr>
-            <tr>
-                <th> Set filter type:  </th>
-                <td>
-                    <label for "filt-set-type-${id}" class= "dropdown">Mode: </label>
-                    <select id = "filt-set-type-${id}" onChange="set_filter_type('${id}')">
-                        <option value="" selected disabled hidden>Select mode</option>
-                        <option value = "MOV">Moving filter</option>
-                        <option value = "REP">Repeating filter</option> 
-                    </select>                              
-                </td>
-            </tr>
-            <tr>
-                <th> Set filter length:  </th>
-                <td> 
-                    <form>
-                        <label for ="filt-set-count-${id}"> Enter filter length</label>
-                        <input id="filt-set-count-${id}" type="text"/>
-                        <input type="button" id="fc_set-${id}" value="Set" onclick="set_filter_count('filt-set-count-${id}','${id}')"/>
-                    </form>
-                </td>
-            </tr>
-            <tr>
-                <th> Enable filter:  </th>
-                <td>                 
-                    <label for "filt-set-state-${id}" class= "dropdown">State: </label>
-                    <select id = "filt-set-state-${id}" onChange="set_filter_state('${id}')">
-                        <option value="" selected disabled hidden>Toggle enable</option>
+                    <td> <span id="filt-state-${id}"></span>
+                        <select id = "filt-set-state-${id}" onChange="set_filter_state('${id}')">
+                        <option value="" selected disabled hidden> </option>
                         <option value = "1">Enable filter</option>
                         <option value = "0">Disable filter</option> 
                     </select> 
+                </td>
+            </tr>
+            <tr>
+                <th> Selected filter type: </th>
+                <td> <span id="filt-curr-type-${id}"></span>
+                    <select id = "filt-set-type-${id}" onChange="set_filter_type('${id}')">
+                        <option value="" selected disabled hidden> </option>
+                        <option value = "MOV">Moving filter</option>
+                        <option value = "REP">Repeating filter</option> 
+                    </select> 
+                </td>
+            </tr>
+            <tr>
+                <th> Selected filter length: </th>
+                <td> <span id="filt-curr-count-${id}"></span> values
+                    <form>
+                        <label for ="filt-set-count-${id}"> Filter length</label>
+                        <input id="filt-set-count-${id}" type="text"/>
+                        <input type="button" id="fc_set-${id}" value="Set" onclick="set_filter_count('filt-set-count-${id}','${id}')"/>
+                    </form> 
                 </td>
             </tr>
         </tbody>
@@ -160,7 +147,15 @@ function create_K2410_interfaces(){
             </tr>
             <tr>
                 <th> Selected voltage range: </th>
-                <td> <span id="volt-curr-range-${id}"></span> V (Maximum +/-)</td>
+                <td> <span id="volt-curr-range-${id}"></span> V (Maximum +/-)
+                    <select id = "volt-set-range-${id}" onChange="set_voltage_range('${id}')">
+                    <option value="" selected disabled hidden> </option>
+                        <option value = "0.21">mV range</option>
+                        <option value = "2.1">2.1V range</option> 
+                        <option value = "21">21V range</option>
+                        <option value = "1100">KV range</option>
+                    </select> 
+                </td>
             </tr>
             <tr id="row1-${id}">
                 <th> Set voltage level:  </th>
@@ -190,20 +185,7 @@ function create_K2410_interfaces(){
                 <input id="time-to-set-${id}" type="text"/>
             </form> 
         </td>
-    </tr>
-            <tr>
-                <th> Set voltage range:  </th>
-                <td>                     
-                    <label for "volt-set-range-${id}" class= "dropdown">Range: </label>
-                    <select id = "volt-set-range-${id}" onChange="set_voltage_range('${id}')">
-                        <option value="" selected disabled hidden>Select Range</option>
-                        <option value = "0.21">mV range</option>
-                        <option value = "2.1">2.1V range</option> 
-                        <option value = "21">21V range</option>
-                        <option value = "1000">KV range</option> 
-                    </select> 
-                </td>
-            </tr>
+    </tr>            
         </tbody>
         </table>
         </div>
@@ -213,7 +195,18 @@ function create_K2410_interfaces(){
         <tbody>
             <tr>
                 <th> Current measured: </th>
-                <td> <span id="curr-meas-${id}"></span> A</td>
+                <td> <span id="curr-meas-${id}"></span>                
+                <select id = "curr-meas-pow-${id}" onChange="set_curr_meas_pow('${id}')">
+                <option value = "1">A </option>
+                <option value = "3">mA (mili)</option>
+                <option value = "6">uA (micro)</option>
+                <option value = "9">nA (nano)</option>
+                <option value = "12">pA (pico)</option>
+                <option value = "15">fA (femto)</option>                
+            </select> 
+                
+                </td>
+                
             </tr>
             <tr>
                 <th> Compliance current: </th>
@@ -247,6 +240,17 @@ function create_K2410_interfaces(){
     }
     
     poll_update_k2410_elements();
+}
+
+function set_curr_meas_pow(id){
+    var pow = parseInt(document.getElementById('curr-meas-pow-'+id).value);
+    console.log(pow,typeof(pow))
+    $.ajax({
+        type: "PUT",
+        url: '/api/' + api_version + '/gpib/devices/' + id + '/current',
+        contentType: "application/json",
+        data: JSON.stringify({'current_meas_pow': pow}),
+    });
 }
 
 function set_ramping_inital(id){
@@ -394,22 +398,56 @@ function handle_k2410_update(){
     }    
 }
 
+function set_init_k2410_values(id) {
+
+}
+
 function update_k2410_elements(id) {
     return function(response) {
         var enabled = $('#enable-toggle-'+id).prop('checked');
+
+        if (up_i<(K2410_devices.length)){
+ 
+            $("#volt-set-range-"+id).val(parseFloat(response[id].voltage.voltage_curr_range))
+            $("#curr-meas-pow-"+id).val(response[id].current.current_meas_pow)
+            if ((response[id].filter.filter_state)=="Enabled"){
+                console.log(id,"Enabled filter")
+                $("#filt-set-state-"+id).val("1")
+            } else if ((response[id].filter.filter_state)=="Disabled"){
+                console.log(id,"Disabled filter")
+                $("#filt-set-state-"+id).val("0")
+            } else {
+                console.log(id,"unkown filter state")
+            }            
+            if ((response[id].filter.filter_curr_type)=="Repeating"){
+                console.log(id,"repeating filter")
+                $("#filt-set-type-"+id).val("REP")
+            } else if ((response[id].filter.filter_curr_type)=="Moving"){
+                console.log(id,"moving filter")
+                $("#filt-set-type-"+id).val("MOV")
+            } else {
+                console.log(id,"unkown filter type")
+            }
+            up_i += 1 
+        }                
+        
         var retrieved_output_state = (response[id].output_state);
         if (retrieved_output_state == true){
             $("#out-state-"+id).html("Enabled");
         } else {
             $("#out-state-"+id).html("Disabled")
         }
+
         $("#filt-state-"+id).html(response[id].filter.filter_state);
         $("#filt-curr-count-"+id).html(response[id].filter.filter_curr_count);
         $("#filt-curr-type-"+id).html(response[id].filter.filter_curr_type);
-        $("#volt-meas-"+id).html(response[id].voltage.voltage_measurement);
+        $("#volt-meas-"+id).html((response[id].voltage.voltage_measurement).toFixed(4))
         $("#volt-curr-range-"+id).html(response[id].voltage.voltage_curr_range);
-        $("#curr-meas-"+id).html(response[id].current.current_measurement);
-        $("#curr-comp-meas-"+id).html(response[id].current.current_curr_comp);     
+        $("#curr-comp-meas-"+id).html(response[id].current.current_curr_comp);       
+
+        var curr_meas =(response[id].current.current_measurement);
+        var pow = (response[id].current.current_meas_pow); 
+        $("#curr-meas-"+id).html((curr_meas *(Math.pow(10,pow))).toFixed(4));
 
         document.getElementById('filt-set-type-'+id).disabled = false;
         document.getElementById('filt-set-state-'+id).disabled = false;
@@ -444,7 +482,7 @@ function update_k2410_elements(id) {
             document.getElementById('cc_set-'+id).disabled = true;
             document.getElementById('fc_set-'+id).disabled = true;
             document.getElementById("output-toggle-"+id).disabled = true;       
-        } 
+        }
     }
 }
 
