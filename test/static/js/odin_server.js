@@ -441,7 +441,7 @@ function update_k2410_elements(id) {
         $("#filt-state-"+id).html(response[id].filter.filter_state);
         $("#filt-curr-count-"+id).html(response[id].filter.filter_curr_count);
         $("#filt-curr-type-"+id).html(response[id].filter.filter_curr_type);
-        $("#volt-meas-"+id).html((response[id].voltage.voltage_measurement).toFixed(4))
+        $("#volt-meas-"+id).html((response[id].voltage.voltage_measurement).toFixed(4));
         $("#volt-curr-range-"+id).html(response[id].voltage.voltage_curr_range);
         $("#curr-comp-meas-"+id).html(response[id].current.current_curr_comp);       
 
@@ -454,6 +454,7 @@ function update_k2410_elements(id) {
         document.getElementById('filt-set-count-'+id).disabled = false;
         document.getElementById('volt-set-range-'+id).disabled = false;
         document.getElementById('volt-set-level-'+id).disabled = false;
+        document.getElementById('curr-meas-pow-'+id).disabled = false;
         document.getElementById('vl_set-'+id).disabled = false; 
         document.getElementById('curr-set-comp-'+id).disabled = false; 
         document.getElementById('cc_set-'+id).disabled = false;
@@ -477,6 +478,7 @@ function update_k2410_elements(id) {
             document.getElementById('filt-set-count-'+id).disabled = true;
             document.getElementById('volt-set-range-'+id).disabled = true;
             document.getElementById('volt-set-level-'+id).disabled = true;
+            document.getElementById('curr-meas-pow-'+id).disabled = true;
             document.getElementById('vl_set-'+id).disabled = true; 
             document.getElementById('curr-set-comp-'+id).disabled = true; 
             document.getElementById('cc_set-'+id).disabled = true;
@@ -540,13 +542,12 @@ function update_k2510_elements(id) {
             $("#tec-out-state-"+id).html("Disabled")
         }
         var enabled = $('#enable-toggle-'+id).prop('checked');
-        $("#tec-power-meas-"+id).html(response[id].info.tec_power);
-        $("#curr-temp-meas-"+id).html(response[id].info.tec_temp_meas);
-        $("#tec-volt-meas-"+id).html(response[id].info.tec_voltage);
-        $("#tec-current-meas-"+id).html(response[id].info.tec_current);
-        $("#tec-set-point-"+id).html(response[id].info.tec_setpoint);
-
-        document.getElementById('temp-set-upper-'+id).disabled = false;
+        //$("#volt-meas-"+id).html((response[id].voltage.voltage_measurement).toFixed(4));
+        $("#tec-power-meas-"+id).html((parseFloat(response[id].info.tec_power).toFixed(3)));
+        $("#curr-temp-meas-"+id).html((parseFloat(response[id].info.tec_temp_meas).toFixed(3)));
+        $("#tec-volt-meas-"+id).html((parseFloat(response[id].info.tec_voltage).toFixed(3)));
+        $("#tec-current-meas-"+id).html((parseFloat(response[id].info.tec_current).toFixed(3)));
+        $("#tec-set-point-"+id).html((parseFloat(response[id].info.tec_setpoint).toFixed(3)));
         document.getElementById('tu_set-'+id).disabled = false;
         document.getElementById('temp-set-lower-'+id).disabled = false;
         document.getElementById('tl_set-'+id).disabled = false;
