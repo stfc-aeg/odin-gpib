@@ -11,6 +11,9 @@ class GpibDevice():
         self.device = device
         self.bus_address = self.device.primary_address
         self.ident = ident.strip()
+
+        self.last_error = "No recorded errors"
+        self.error_count = 0
     
     def __repr__(self):
         #when devices is printed it will show the idnt and at the address
@@ -24,7 +27,6 @@ class GpibDevice():
         pass
 
     def write(self, cmd):
-        #print(self.device,"inside device.py", + self.device_control_enable)
         if self.device_control_enable:  
             with self.lock:
                 ret = self.device.write(cmd)
@@ -35,18 +37,29 @@ class GpibDevice():
                 return ret 
 
     def query(self, cmd):
-        #print(self.device,"inside device.py", + self.device_control_enable)
         if self.device_control_enable:
             with self.lock:
                 ret = self.device.query(cmd)
                 return ret
 
     def query_ascii_values(self, cmd):
-        #print(self.device,"inside device.py", + self.device_control_enable)
-        if self.device_control_enable:            
-            with self.lock:
-                ret = self.device.query_ascii_values(cmd)
-                return ret
+        print("Last Error: ",self.last_error," | No of Errors: ",self.error_count)
+        if self.device_control_enable:
+            try:           
+                with self.lock:
+                    ret = self.device.query_ascii_values(cmd)
+                    return ret
+            except UnicodeDecodeError:
+                with self.lock:
+                    self.error_count += 1
+                    self.last_error = "UnicodeDecodeError"
+                    ret2 = ["0","0","0","0","0"]
+                    return ret2
+            except:
+                ret2 = ["0","0","0","0","0"]
+                self.error_count += 1
+                self.last_error = "Something went wrong"
+                return ret2       
 
     
     def ret_control_state(self):

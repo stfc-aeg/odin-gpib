@@ -173,7 +173,8 @@ function create_K2410_interfaces(){
                 <form>
                     <label for ="volt-ramp-set-level-${id}"> Voltage: </label>
                     <input id="volt-ramp-set-level-${id}" type="text"/>
-                    <input type = "button" id="vl_set-${id}" value="Set" onclick="set_voltage_ramp_level('volt-ramp-set-level-${id}','time-to-set-${id}','${id}')" />
+                    <input type = "button" id="vlr_set-${id}" value="Set" onclick="set_voltage_ramp_level('volt-ramp-set-level-${id}','time-to-set-${id}','${id}')" />
+                    <input type = "button" id="vr_cancel-${id}" value="Cancel" onclick="cancel_ramp('${id}')" />
                 </form> 
             </td>
         </tr>
@@ -295,7 +296,7 @@ function create_K2510_interfaces(){
                     </label>                           
                 </div>
                     <div>
-                          
+                        <button onclick="set_over_temp('${id}')" id="reset-temp-${id}">Reset over_temp state</button>  
                     </div>
             </div>
         </div>
@@ -429,7 +430,20 @@ function update_k2410_elements(id) {
                 console.log(id,"unkown filter type")
             }
             up_i += 1 
-        }                
+        }  
+
+         if (response[id].ramping_flag == true){
+            document.getElementById('vr_cancel-'+id).style.display = '';
+            document.getElementById("vlr_set-"+id).disabled = true;
+            document.getElementById("ramping-toggle-"+id).disabled = true;
+            document.getElementById("volt-set-range-"+id).disabled = true;
+            
+        } else {
+            document.getElementById('vr_cancel-'+id).style.display = 'none';
+            document.getElementById("vlr_set-"+id).disabled = false;
+            document.getElementById("ramping-toggle-"+id).disabled = false;
+            document.getElementById("volt-set-range-"+id).disabled = false;
+        }           
         
         var retrieved_output_state = (response[id].output_state);
         if (retrieved_output_state == true){
@@ -449,13 +463,16 @@ function update_k2410_elements(id) {
         var pow = (response[id].current.current_meas_pow); 
         $("#curr-meas-"+id).html((curr_meas *(Math.pow(10,pow))).toFixed(4));
 
+        if (response[id].ramping_flag == false){
+            document.getElementById('vlr_set-'+id).disabled = false;
+            document.getElementById('volt-set-range-'+id).disabled = false;
+        }
         document.getElementById('filt-set-type-'+id).disabled = false;
         document.getElementById('filt-set-state-'+id).disabled = false;
         document.getElementById('filt-set-count-'+id).disabled = false;
-        document.getElementById('volt-set-range-'+id).disabled = false;
         document.getElementById('volt-set-level-'+id).disabled = false;
         document.getElementById('curr-meas-pow-'+id).disabled = false;
-        document.getElementById('vl_set-'+id).disabled = false; 
+        document.getElementById('vl_set-'+id).disabled = false;
         document.getElementById('curr-set-comp-'+id).disabled = false; 
         document.getElementById('cc_set-'+id).disabled = false;
         document.getElementById('fc_set-'+id).disabled = false;        
@@ -476,14 +493,15 @@ function update_k2410_elements(id) {
             document.getElementById('filt-set-type-'+id).disabled = true;
             document.getElementById('filt-set-state-'+id).disabled = true;
             document.getElementById('filt-set-count-'+id).disabled = true;
-            document.getElementById('volt-set-range-'+id).disabled = true;
             document.getElementById('volt-set-level-'+id).disabled = true;
             document.getElementById('curr-meas-pow-'+id).disabled = true;
             document.getElementById('vl_set-'+id).disabled = true; 
             document.getElementById('curr-set-comp-'+id).disabled = true; 
             document.getElementById('cc_set-'+id).disabled = true;
             document.getElementById('fc_set-'+id).disabled = true;
-            document.getElementById("output-toggle-"+id).disabled = true;       
+            document.getElementById("output-toggle-"+id).disabled = true; 
+            document.getElementById('volt-set-range-'+id).disabled = true;
+            document.getElementById('vlr_set-'+id).disabled = true;
         }
     }
 }
@@ -526,6 +544,16 @@ function set_ramping_k2410(id) {
     }
 }
 
+function cancel_ramp(id){
+    var value = false
+    $.ajax({
+        type: "PUT",
+        url: '/api/' + api_version + '/gpib/devices/' + id,
+        contentType: "application/json",
+        data: JSON.stringify({'ramping_flag': value}),
+    });
+}
+
 function handle_k2510_update(){
     for (let x in K2510_devices) {
         var id = K2510_devices[x];
@@ -541,13 +569,21 @@ function update_k2510_elements(id) {
         } else {
             $("#tec-out-state-"+id).html("Disabled")
         }
+
+        
+        if (response[id].temp_over_state){
+            document.getElementById('reset-temp-'+id).style.display = '';
+        } else {
+            document.getElementById('reset-temp-'+id).style.display = 'none';
+        }
+
         var enabled = $('#enable-toggle-'+id).prop('checked');
-        //$("#volt-meas-"+id).html((response[id].voltage.voltage_measurement).toFixed(4));
         $("#tec-power-meas-"+id).html((parseFloat(response[id].info.tec_power).toFixed(3)));
         $("#curr-temp-meas-"+id).html((parseFloat(response[id].info.tec_temp_meas).toFixed(3)));
         $("#tec-volt-meas-"+id).html((parseFloat(response[id].info.tec_voltage).toFixed(3)));
         $("#tec-current-meas-"+id).html((parseFloat(response[id].info.tec_current).toFixed(3)));
         $("#tec-set-point-"+id).html((parseFloat(response[id].info.tec_setpoint).toFixed(3)));
+        document.getElementById('temp-set-upper-'+id).disabled = false;
         document.getElementById('tu_set-'+id).disabled = false;
         document.getElementById('temp-set-lower-'+id).disabled = false;
         document.getElementById('tl_set-'+id).disabled = false;
@@ -556,7 +592,7 @@ function update_k2510_elements(id) {
         document.getElementById("output-toggle-"+id).disabled = false;
         (document.getElementById("enable-toggle-"+id)).checked = (response[id].device_control_state);
         (document.getElementById("output-toggle-"+id)).checked = (response[id].output_state);
-        
+    
         if (enabled == false){
             $("#tec-power-meas-"+id).html("--");
             $("#curr-temp-meas-"+id).html("--");
@@ -667,6 +703,7 @@ function set_voltage_ramp_level(volt_id,time_id,id){
         console.log(voltage, time)
         console.log(voltage,time);
         console.log("Sending time")
+       
         $.ajax({
             type: "PUT",
             url: '/api/' + api_version + '/gpib/devices/' + id + '/voltage',
@@ -846,7 +883,7 @@ function set_temp_level(element_id,id){
     }     
 }
 
-function set_output_k2510(id) {
+function set_output_k2510(id){
     var toggle = $('#output-toggle-'+id).prop('checked');
     console.log("Output toggle for " + id + " set to " + toggle);
     $.ajax({
@@ -854,5 +891,15 @@ function set_output_k2510(id) {
         url: '/api/' + api_version + '/gpib/devices/' + id,
         contentType: "application/json",
         data: JSON.stringify({'output_state': toggle}),
+    });
+}
+
+function set_over_temp(id){
+    var value = false
+    $.ajax({
+        type: "PUT",
+        url: '/api/' + api_version + '/gpib/devices/' + id,
+        contentType: "application/json",
+        data: JSON.stringify({'temp_over_state': value}),
     });
 }

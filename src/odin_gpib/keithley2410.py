@@ -30,7 +30,8 @@ class K2410(GpibDevice):
         
         print("OUTPUT: ",self.output_state)
 
-        self.device_control_enable = True  
+        self.device_control_enable = True 
+        self.ramping_flag = False 
 
         self.filter_set_enable = ""
         self.filter_set_type = ""
@@ -79,6 +80,7 @@ class K2410(GpibDevice):
         self.param_tree = ParameterTree({
             'output_state': (lambda: self.output_state, self.set_output_state),
             'device_control_state': (lambda: self.device_control_enable, self.set_control_enable),
+            'ramping_flag': (lambda: self.ramping_flag, self.set_ramping_flag),
             'type': (lambda: self.type, None),
             'ident': (lambda: self.ident, None),
             'address': (lambda: self.bus_address, None),
@@ -92,6 +94,9 @@ class K2410(GpibDevice):
 
     def set_time(self, time):
         self.voltage_time = time
+    
+    def set_ramping_flag(self,flag):
+        self.ramping_flag = flag
 
     def get_output_state(self):
         output_state = self.query(':OUTP?')
@@ -117,12 +122,10 @@ class K2410(GpibDevice):
                                                
     def get_voltage_measurement(self):
         self.voltage_meas = (self.query_ascii_values(':MEAS:VOLT?')[0])
-        #logging.debug("Voltage from %s", self.info + " = " + (str(self.voltage_meas)))
 
     def get_voltage_range(self):
         self.voltage_curr_range = (self.query((':SOUR:VOLT:RANG?')))
         
-
     def get_filter_state(self):
         self.filter_curr_state = (self.query(':SENS:AVER:STAT?'))
         if "1" in self.filter_curr_state:
@@ -156,12 +159,14 @@ class K2410(GpibDevice):
         self.write((curr_comp_format))
 
     def set_voltage(self, voltage_setpoint):
-        voltage_setpoint = str(voltage_setpoint)
-        self.write((':SOUR:VOLT:LEV %s' %voltage_setpoint))
+        if (not(self.ramping_flag)):
+            voltage_setpoint = str(voltage_setpoint)
+            self.write((':SOUR:VOLT:LEV %s' %voltage_setpoint))
 
     def set_voltage_range(self, voltage_set_range):
-        self.voltage_set_range = voltage_set_range
-        self.write((':SOUR:VOLT:RANG %s' %voltage_set_range))
+        if (not(self.ramping_flag)):
+            self.voltage_set_range = voltage_set_range
+            self.write((':SOUR:VOLT:RANG %s' %voltage_set_range))
 
     def set_filter_count(self, filter_count_setpoint):
         filter_count_setpoint = str(filter_count_setpoint)
@@ -182,7 +187,7 @@ class K2410(GpibDevice):
 
     def update(self):
         self.get_output_state()
-        if (self.output_state) and (self.device_control_enable):        
+        if (self.output_state) and (self.device_control_enable):       
             self.get_filter_state()
             self.get_filter_curr_count()
             self.get_filter_curr_type()
@@ -195,6 +200,7 @@ class K2410(GpibDevice):
 
     @run_on_executor
     def set_ramp_voltage(self, voltage_setpoint):
+        self.ramping_flag = True
 
         volt_measurement = self.voltage_meas
         setpoint = float(voltage_setpoint)
@@ -203,7 +209,7 @@ class K2410(GpibDevice):
 
         if increment < 0:
             count = volt_measurement
-            while (count > setpoint):
+            while ((count > setpoint) and self.ramping_flag):
                 count += increment
                 if count <  setpoint:
                     count = setpoint
@@ -214,7 +220,7 @@ class K2410(GpibDevice):
 
         if increment > 0: 
             count = volt_measurement 
-            while (count < setpoint):
+            while ((count < setpoint) and self.ramping_flag):
                 count += increment
                 if count > setpoint:
                     count = setpoint
@@ -223,7 +229,4 @@ class K2410(GpibDevice):
                 
                 time.sleep(1)
 
-
-
-
-
+        self.ramping_flag = False

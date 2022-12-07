@@ -24,6 +24,7 @@ class K2510(GpibDevice):
 
         self.device_control_enable = True
         self.output_state = False
+        self.temp_over_state = False
 
         #Make outp? check function in gpibdevice class
         output_init_state = self.device.query(':OUTP?')
@@ -51,12 +52,16 @@ class K2510(GpibDevice):
         self.param_tree = ParameterTree({
             'output_state': (lambda: self.output_state, self.set_output_state),
             'device_control_state': (lambda: self.device_control_enable, self.set_control_enable),
+            'temp_over_state': (lambda: self.temp_over_state, self.set_temp_over_state),
             'type': (lambda: self.type, None),
             'ident': (lambda: self.ident, None),
             'address': (lambda: self.bus_address, None),
             'temp': temp_controls,
             'info': tec_information
         })
+
+    def set_temp_over_state(self, temp_state):
+        self.temp_over_state = temp_state       
 
     def get_tec_power(self):
         self.tec_power = ("{:.6f}".format(float(self.query_ascii_values(':MEAS:POW?')[0])))
@@ -69,6 +74,13 @@ class K2510(GpibDevice):
 
     def get_tec_temp_meas(self):
         self.tec_temp_meas = ("{:.6f}".format(float(self.query_ascii_values(':MEAS:TEMP?')[0])))
+        if (float(self.tec_temp_meas) > 40):
+            logging.debug("Over temp")
+            self.temp_over_state = True
+            self.output_state = False
+            self.write(':OUTP OFF')
+        else:
+            logging.debug("Under temp")
     
     def get_tec_setpoint(self):
         self.tec_setpoint = ("{:.6f}".format(float(self.query_ascii_values(':SOUR:TEMP?')[0])))
@@ -114,7 +126,8 @@ class K2510(GpibDevice):
             self.write(':SYSTEM:KEY 16')
 
     def update(self):
-        if self.device_control_enable:
+        if ((self.device_control_enable) and not(self.temp_over_state)):
+            logging.debug("Updating k2510")
             self.get_output_state()
             self.get_tec_voltage()
             self.get_tec_current()
