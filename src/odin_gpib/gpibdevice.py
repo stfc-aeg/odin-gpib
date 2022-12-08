@@ -40,10 +40,10 @@ class GpibDevice():
         if self.device_control_enable:
             with self.lock:
                 ret = self.device.query(cmd)
-                return ret
+                return ret 
 
     def query_ascii_values(self, cmd):
-        print("Last Error: ",self.last_error," | No of Errors: ",self.error_count)
+        print(self.bus_address,": Last Error: ",self.last_error," | No of Errors: ",self.error_count)
         if self.device_control_enable:
             try:           
                 with self.lock:
@@ -53,13 +53,11 @@ class GpibDevice():
                 with self.lock:
                     self.error_count += 1
                     self.last_error = "UnicodeDecodeError"
-                    ret2 = ["0","0","0","0","0"]
-                    return ret2
+                    return None
             except:
-                ret2 = ["0","0","0","0","0"]
                 self.error_count += 1
                 self.last_error = "Something went wrong"
-                return ret2       
+                return None       
 
     
     def ret_control_state(self):

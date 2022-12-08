@@ -64,33 +64,56 @@ class K2510(GpibDevice):
         self.temp_over_state = temp_state       
 
     def get_tec_power(self):
-        self.tec_power = ("{:.6f}".format(float(self.query_ascii_values(':MEAS:POW?')[0])))
+        tec_power = (self.query_ascii_values(':MEAS:POW?'))
+        if (tec_power == None):
+            pass
+        else:
+            self.tec_power = ("{:.6f}".format(float(tec_power[0])))
 
     def get_tec_current(self):
-        self.tec_current = ("{:.6f}".format(float(self.query_ascii_values(':MEAS:CURR?')[0])))
+        tec_current = (self.query_ascii_values(':MEAS:CURR?'))
+        if (tec_current == None):
+            pass
+        else:
+            self.tec_current = ("{:.6f}".format(float(tec_current[0])))        
 
     def get_tec_voltage(self):
-        self.tec_voltage = ("{:.6f}".format(float(self.query_ascii_values(':MEAS:VOLT?')[0])))
+        tec_voltage = (self.query_ascii_values(':MEAS:VOLT?'))
+        if (tec_voltage == None):
+            pass
+        else:
+            self.tec_voltage = ("{:.6f}".format(float(tec_voltage[0])))        
 
     def get_tec_temp_meas(self):
-        self.tec_temp_meas = ("{:.6f}".format(float(self.query_ascii_values(':MEAS:TEMP?')[0])))
-        if (float(self.tec_temp_meas) > 40):
-            logging.debug("Over temp")
-            self.temp_over_state = True
-            self.output_state = False
-            self.write(':OUTP OFF')
+        tec_temp_meas = (self.query_ascii_values(':MEAS:TEMP?'))
+        if (tec_temp_meas == None):
+            pass
         else:
-            logging.debug("Under temp")
+            self.tec_temp_meas = ("{:.6f}".format(float(tec_temp_meas[0])))
+            if (float(self.tec_temp_meas) > 40):
+                logging.debug("Over temp")
+                self.temp_over_state = True
+                self.output_state = False
+                self.write(':OUTP OFF')
+            else:
+                logging.debug("Under temp")    
     
     def get_tec_setpoint(self):
-        self.tec_setpoint = ("{:.6f}".format(float(self.query_ascii_values(':SOUR:TEMP?')[0])))
+        tec_setpoint = (self.query_ascii_values(':SOUR:TEMP?'))
+        if (tec_setpoint == None):
+            pass
+        else:
+            self.tec_setpoint = ("{:.6f}".format(float(tec_setpoint[0])))        
 
     def get_output_state(self):
         output_state = self.query(':OUTP?')
-        if ("1" in output_state):
-            self.output_state = True
-        if ("0" in output_state):
-            self.output_state = False
+        if (output_state == None):
+            pass
+        else:
+            if ("1" in output_state):
+                self.output_state = True
+            if ("0" in output_state):
+                self.output_state = False
 
     def set_temp_unit(self):
         self.write(':UNIT:TEMP CEL')

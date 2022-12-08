@@ -100,10 +100,13 @@ class K2410(GpibDevice):
 
     def get_output_state(self):
         output_state = self.query(':OUTP?')
-        if ("1" in output_state):
-            self.output_state = True
-        if ("0" in output_state):
-            self.output_state = False
+        if (output_state == None):
+            pass
+        else:
+            if ("1" in output_state):
+                self.output_state = True
+            if ("0" in output_state):
+                self.output_state = False
     
     def set_output_state(self, output_state):
         if output_state == False:
@@ -121,37 +124,64 @@ class K2410(GpibDevice):
             self.write(':SYSTEM:KEY 23')
                                                
     def get_voltage_measurement(self):
-        self.voltage_meas = (self.query_ascii_values(':MEAS:VOLT?')[0])
+        voltage_meas = (self.query_ascii_values(':MEAS:VOLT?'))
+        if (voltage_meas == None):
+            pass
+        else:
+            self.voltage_meas = (voltage_meas[0])
 
     def get_voltage_range(self):
-        self.voltage_curr_range = (self.query((':SOUR:VOLT:RANG?')))
+        voltage_curr_range = (self.query((':SOUR:VOLT:RANG?')))
+        if (voltage_curr_range == None):
+            pass
+        else:
+            self.voltage_curr_range = voltage_curr_range
         
     def get_filter_state(self):
-        self.filter_curr_state = (self.query(':SENS:AVER:STAT?'))
-        if "1" in self.filter_curr_state:
-            self.filter_curr_state = "Enabled"
-        elif "0" in self.filter_curr_state:
-            self.filter_curr_state = "Disabled"
-        else: 
+        filter_curr_state = (self.query(':SENS:AVER:STAT?'))
+        if (filter_curr_state == None):
             pass
+        else:
+            if "1" in filter_curr_state:
+                self.filter_curr_state = "Enabled"
+            elif "0" in filter_curr_state:
+                self.filter_curr_state = "Disabled"
+            else: 
+                pass
 
     def get_filter_curr_count(self):
-        self.filter_curr_count = (self.query(':SENS:AVER:COUN?'))
+        filter_curr_count = (self.query(':SENS:AVER:COUN?'))
+        if (filter_curr_count == None):
+            pass
+        else:
+            self.filter_curr_count = filter_curr_count        
 
     def get_filter_curr_type(self):
-        self.filter_curr_type = (self.query(':SENS:AVER:TCON?'))
-        if "MOV" in self.filter_curr_type:
-            self.filter_curr_type = "Moving"
-        elif "REP" in self.filter_curr_type:
-            self.filter_curr_type = "Repeating"
-        else: 
+        filter_curr_type = (self.query(':SENS:AVER:TCON?'))
+        if (filter_curr_type == None):
             pass
+        else:
+            self.filter_curr_type = filter_curr_type
+            if "MOV" in self.filter_curr_type:
+                self.filter_curr_type = "Moving"
+            elif "REP" in self.filter_curr_type:
+                self.filter_curr_type = "Repeating"
+            else: 
+                pass        
 
     def get_current_measurement(self):
-        self.current_meas = (self.query_ascii_values(':MEAS:CURR?')[1])
+        current_meas = (self.query_ascii_values(':MEAS:CURR?'))
+        if (current_meas == None):
+            pass
+        else:
+            self.current_meas = (current_meas[1])
 
     def get_current_comp(self):
-        self.current_curr_comp = (self.query_ascii_values(':SENS:CURR:PROT?'))
+        current_curr_comp = (self.query_ascii_values(':SENS:CURR:PROT?'))
+        if (current_curr_comp == None):
+            pass
+        else:
+            self.current_curr_comp = current_curr_comp
 
     def set_current_comp(self, curr_comp_setpoint):
         curr_comp_setpoint = str(curr_comp_setpoint)
