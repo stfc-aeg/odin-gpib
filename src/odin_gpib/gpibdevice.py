@@ -38,9 +38,16 @@ class GpibDevice():
 
     def query(self, cmd):
         if self.device_control_enable:
-            with self.lock:
-                ret = self.device.query(cmd)
-                return ret 
+            try:
+                with self.lock:
+                    ret = self.device.query(cmd)
+                    return ret
+            except:
+                with self.lock:
+                    self.error_count += 1
+                    self.last_error = "Something went wrong"
+                    return None
+
 
     def query_ascii_values(self, cmd):
         print(self.bus_address,": Last Error: ",self.last_error," | No of Errors: ",self.error_count)
