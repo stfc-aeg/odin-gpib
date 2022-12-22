@@ -13,7 +13,6 @@ $( document ).ready(function() {
 
 //gets the most up to date api version
 function update_api_version() {
-
     $.getJSON('/api', function(response) {
         $('#api-version').html(response.api);
         api_version = response.api;
@@ -22,7 +21,6 @@ function update_api_version() {
 
 //obtains the current loaded api adapters
 function update_api_adapters() {
-
     $.getJSON('/api/' + api_version + '/adapters/', function(response) {
         adapter_list = response.adapters.join(", ");
         $('#api-adapters').html(adapter_list);
@@ -69,7 +67,7 @@ function create_K2410_interfaces(){
                 <div> Keithley 2410 power supply: ${id}</div>
                 <div>
                     <label class = "switch-label" for = "enable-toggle-${id}">
-                    Enable control
+                    <p>Enable control&nbsp&nbsp</p>
                     </label>
                     <label class = "switch">
                     <input type="checkbox" onclick="set_enable_k2410('${id}')" id="enable-toggle-${id}">
@@ -78,7 +76,7 @@ function create_K2410_interfaces(){
                 </div>
                 <div>
                     <label class = "switch-label" for = "output-toggle-${id}">
-                    Enable output
+                    <p>Enable output&nbsp&nbsp&nbsp</p>
                     </label>
                     <label class = "switch">                        
                     <input class type="checkbox" onclick="set_output_k2410('${id}')" id="output-toggle-${id}">
@@ -87,7 +85,7 @@ function create_K2410_interfaces(){
                 </div>
                 <div>
                     <label class = "switch-label" for = "ramping-toggle-${id}">
-                    Enable ramping
+                    <p>Enable ramping</p>
                     </label>
                     <label class = "switch">                        
                     <input class type="checkbox" onclick="set_ramping_k2410('${id}')" id="ramping-toggle-${id}">
@@ -196,22 +194,11 @@ function create_K2410_interfaces(){
         <tbody>
             <tr>
                 <th> Current measured: </th>
-                <td> <span id="curr-meas-${id}"></span>                
-                <select id = "curr-meas-pow-${id}" onChange="set_curr_meas_pow('${id}')">
-                <option value = "1">A </option>
-                <option value = "3">mA (mili)</option>
-                <option value = "6">uA (micro)</option>
-                <option value = "9">nA (nano)</option>
-                <option value = "12">pA (pico)</option>
-                <option value = "15">fA (femto)</option>                
-            </select> 
-                
-                </td>
-                
+                <td> <span id="curr-meas-${id}"></span></td>                
             </tr>
             <tr>
                 <th> Compliance current: </th>
-                <td> <span id="curr-comp-meas-${id}"></span> A</td>
+                <td> <span id="curr-comp-meas-${id}"></span></td>
             </tr>
             <tr>
                 <th> Set compliance current:  </th>
@@ -229,39 +216,19 @@ function create_K2410_interfaces(){
         </div>
         </div>
         `
-        $("#K2410test").html(K2410_html); 
-        //console.log(K2410_html)
-        //set_ramping_inital(id)
-        
+        $("#K2410test").html(K2410_html);         
     }
-    
     for (let x in K2410_devices) {
         var id = K2410_devices[x];
         set_ramping_inital(id)
     }
-    
     poll_update_k2410_elements();
 }
 
-function set_curr_meas_pow(id){
-    var pow = parseInt(document.getElementById('curr-meas-pow-'+id).value);
-    console.log(pow,typeof(pow))
-    $.ajax({
-        type: "PUT",
-        url: '/api/' + api_version + '/gpib/devices/' + id + '/current',
-        contentType: "application/json",
-        data: JSON.stringify({'current_meas_pow': pow}),
-    });
-}
-
 function set_ramping_inital(id){
-    console.log("ID after wiritng html to div"+id)
     document.getElementById('row1-'+id).style.display = '';
-    console.log('row1-'+id)
     document.getElementById('row2-'+id).style.display = 'none';
-    console.log('row2-'+id)
     document.getElementById('row3-'+id).style.display = 'none';
-    console.log('row3-'+id)
 }
 
 //iterates through the list of K2510 devices and generates a new div containing the controls for that
@@ -278,7 +245,7 @@ function create_K2510_interfaces(){
                 <div> Keithley 2510 Peltier Controller: ${id}</div>
                 <div>
                     <label class = "switch-label" for = "enable-toggle-${id}">
-                    Enable control
+                    Enable control&nbsp&nbsp
                     </label>
                     <label class = "switch">
                         <input type="checkbox" onclick="set_enable_k2510('${id}')" id="enable-toggle-${id}">
@@ -288,7 +255,7 @@ function create_K2510_interfaces(){
 
                 <div>
                     <label class = "switch-label" for = "output-toggle-${id}">
-                    Enable output
+                    <p>Enable output</p>
                     </label>
                     <label class = "switch">                        
                     <input type="checkbox" onclick="set_output_k2510('${id}')" id="output-toggle-${id}">
@@ -331,28 +298,26 @@ function create_K2510_interfaces(){
         </tbody>
         </table>
         </li>
-
-
         <li class="column">
         <table class="table table-striped">
         <tbody>
             <tr>
-                <th> Set upper temp limit:  </th>
+                <th> Set current limit:  </th>
                 <td>         
                     <form>
-                        <label for ="temp-set-upper-${id}"> Upper temp: </label>
-                        <input id="temp-set-upper-${id}" type="text"/>
-                        <input type = "button" id="tu_set-${id}" value="Set" onclick="set_up_temp_level('temp-set-upper-${id}','${id}')" />
+                        <label for ="curr-set-limit-${id}"> Current: </label>
+                        <input id="curr-set-limit-${id}" type="text"/>
+                        <input type = "button" id="c_lim_set-${id}" value="Set" onclick="set_current_limit('curr-set-limit-${id}','${id}')" />
                     </form> 
                 </td>
             </tr>
             <tr>
-            <th> Set lower temp limit:  </th>
+            <th> Set voltage limit:  </th>
             <td>         
                 <form>
-                    <label for ="temp-set-lower-${id}"> Lower temp: </label>
-                    <input id="temp-set-lower-${id}" type="text"/>
-                    <input type = "button" id="tl_set-${id}" value="Set" onclick="set_down_temp_level('temp-set-lower-${id}','${id}')" />
+                    <label for ="volt-set-limit-${id}"> Voltage: </label>
+                    <input id="volt-set-limit-${id}" type="text"/>
+                    <input type = "button" id="v_lim_set-${id}" value="Set" onclick="set_voltage_limit('volt-set-limit-${id}','${id}')" />
                 </form> 
             </td>
             </tr>
@@ -361,7 +326,7 @@ function create_K2510_interfaces(){
             <th> Set temp level:  </th>
             <td>         
                 <form>
-                    <label for ="temp-set-level-${id}"> Temp point: </label>
+                    <label for ="temp-set-level-${id}"> Temp: </label>
                     <input id="temp-set-level-${id}" type="text"/>
                     <input type = "button" id="tp_set-${id}" value="Set" onclick="set_temp_level('temp-set-level-${id}','${id}')" />
                 </form> 
@@ -399,35 +364,23 @@ function handle_k2410_update(){
     }    
 }
 
-function set_init_k2410_values(id) {
-
-}
-
 function update_k2410_elements(id) {
     return function(response) {
-        var enabled = $('#enable-toggle-'+id).prop('checked');
-
+        (document.getElementById("enable-toggle-"+id)).checked = (response[id].device_control_state);
+        (document.getElementById("output-toggle-"+id)).checked = (response[id].output_state);
+        // Section of code runs for each K2410 device when the page is loaded
         if (up_i<(K2410_devices.length)){
- 
+            //Sets the inital state of the dropdowns so that they are in sync with the adapter state
             $("#volt-set-range-"+id).val(parseFloat(response[id].voltage.voltage_curr_range))
-            $("#curr-meas-pow-"+id).val(response[id].current.current_meas_pow)
             if ((response[id].filter.filter_state)=="Enabled"){
-                console.log(id,"Enabled filter")
                 $("#filt-set-state-"+id).val("1")
             } else if ((response[id].filter.filter_state)=="Disabled"){
-                console.log(id,"Disabled filter")
                 $("#filt-set-state-"+id).val("0")
-            } else {
-                console.log(id,"unkown filter state")
             }            
             if ((response[id].filter.filter_curr_type)=="Repeating"){
-                console.log(id,"repeating filter")
                 $("#filt-set-type-"+id).val("REP")
             } else if ((response[id].filter.filter_curr_type)=="Moving"){
-                console.log(id,"moving filter")
                 $("#filt-set-type-"+id).val("MOV")
-            } else {
-                console.log(id,"unkown filter type")
             }
             up_i += 1 
         }  
@@ -437,7 +390,6 @@ function update_k2410_elements(id) {
             document.getElementById("vlr_set-"+id).disabled = true;
             document.getElementById("ramping-toggle-"+id).disabled = true;
             document.getElementById("volt-set-range-"+id).disabled = true;
-            
         } else {
             document.getElementById('vr_cancel-'+id).style.display = 'none';
             document.getElementById("vlr_set-"+id).disabled = false;
@@ -445,88 +397,74 @@ function update_k2410_elements(id) {
             document.getElementById("volt-set-range-"+id).disabled = false;
         }           
         
-        var retrieved_output_state = (response[id].output_state);
-        if (retrieved_output_state == true){
+        if (response[id].output_state){
             $("#out-state-"+id).html("Enabled");
         } else {
             $("#out-state-"+id).html("Disabled")
         }
 
-        $("#filt-state-"+id).html(response[id].filter.filter_state);
-        $("#filt-curr-count-"+id).html(response[id].filter.filter_curr_count);
-        $("#filt-curr-type-"+id).html(response[id].filter.filter_curr_type);
-        $("#volt-meas-"+id).html((response[id].voltage.voltage_measurement).toFixed(4));
-        $("#volt-curr-range-"+id).html(response[id].voltage.voltage_curr_range);
-        $("#curr-comp-meas-"+id).html(response[id].current.current_curr_comp);       
+        K2410_output_list = ["#filt-state-","#filt-curr-count-","#filt-curr-type-","#volt-meas-","#volt-curr-range-",
+                            "#curr-meas-","#curr-comp-meas-","#out-state-"];
+        K2410_input_list = ["filt-set-type-","filt-set-state-","filt-set-count-","volt-set-level-",
+                           "vl_set-","curr-set-comp-","cc_set-","fc_set-","output-toggle-"]
+        var enabled = $('#enable-toggle-'+id).prop('checked');
 
-        var curr_meas =(response[id].current.current_measurement);
-        var pow = (response[id].current.current_meas_pow); 
-        $("#curr-meas-"+id).html((curr_meas *(Math.pow(10,pow))).toFixed(4));
-
-        if (response[id].ramping_flag == false){
-            document.getElementById('vlr_set-'+id).disabled = false;
-            document.getElementById('volt-set-range-'+id).disabled = false;
-        }
-        document.getElementById('filt-set-type-'+id).disabled = false;
-        document.getElementById('filt-set-state-'+id).disabled = false;
-        document.getElementById('filt-set-count-'+id).disabled = false;
-        document.getElementById('volt-set-level-'+id).disabled = false;
-        document.getElementById('curr-meas-pow-'+id).disabled = false;
-        document.getElementById('vl_set-'+id).disabled = false;
-        document.getElementById('curr-set-comp-'+id).disabled = false; 
-        document.getElementById('cc_set-'+id).disabled = false;
-        document.getElementById('fc_set-'+id).disabled = false;        
-        document.getElementById("output-toggle-"+id).disabled = false;
-        (document.getElementById("enable-toggle-"+id)).checked = (response[id].device_control_state);
-        (document.getElementById("output-toggle-"+id)).checked = (response[id].output_state);
-        
-        
         if (enabled == false){
-            $("#filt-state-"+id).html("--");
-            $("#filt-curr-count-"+id).html("--");        
-            $("#filt-curr-type-"+id).html("--"); 
-            $("#volt-meas-"+id).html("--");
-            $("#volt-curr-range-"+id).html("--"); 
-            $("#curr-meas-"+id).html("--");
-            $("#curr-comp-meas-"+id).html("--");
-            $("#out-state-"+id).html("--")
-            document.getElementById('filt-set-type-'+id).disabled = true;
-            document.getElementById('filt-set-state-'+id).disabled = true;
-            document.getElementById('filt-set-count-'+id).disabled = true;
-            document.getElementById('volt-set-level-'+id).disabled = true;
-            document.getElementById('curr-meas-pow-'+id).disabled = true;
-            document.getElementById('vl_set-'+id).disabled = true; 
-            document.getElementById('curr-set-comp-'+id).disabled = true; 
-            document.getElementById('cc_set-'+id).disabled = true;
-            document.getElementById('fc_set-'+id).disabled = true;
-            document.getElementById("output-toggle-"+id).disabled = true; 
+            for(x in K2410_output_list){
+                $(K2410_output_list[x]+id).html("--");            
+            }
+            for(x in K2410_input_list){
+                document.getElementById(K2410_input_list[x]+id).disabled = true;
+            } 
             document.getElementById('volt-set-range-'+id).disabled = true;
             document.getElementById('vlr_set-'+id).disabled = true;
+        } else {
+            for(x in K2410_input_list){
+                document.getElementById(K2410_input_list[x]+id).disabled = false;
+            }
+            $("#filt-state-"+id).html(response[id].filter.filter_state);
+            $("#filt-curr-count-"+id).html(response[id].filter.filter_curr_count);
+            $("#filt-curr-type-"+id).html(response[id].filter.filter_curr_type);
+            $("#volt-meas-"+id).html((response[id].voltage.voltage_measurement).toFixed(4));
+            $("#volt-curr-range-"+id).html(response[id].voltage.voltage_curr_range);
+            $("#curr-comp-meas-"+id).html(toSiUnit(response[id].current.current_curr_comp));
+            //var curr_meas =(response[id].current.current_measurement);
+            //console.log(curr_meas,typeof(curr_meas))
+            $("#curr-meas-"+id).html(toSiUnit(response[id].current.current_measurement));
         }
+    }
+}
+
+function toSiUnit(num){
+    numin = num
+    pow = [-15,-12,-9,-6,-3,0]
+    siUnit = ['f','p','n','μ','m','']
+    i=5
+    isNegative = numin < 0;
+    if (isNegative) {
+        numin = -numin;
+    }
+    testnum = (numin / (Math.pow(10,pow[i])))
+    while ( testnum < 1){
+        i = i -1
+        testnum = (numin / (Math.pow(10,pow[i])))
+    }
+    if (isNegative) {
+        return(('-'+testnum.toFixed(2))+' '+siUnit[i]+'A')
+    } else{
+        return((testnum.toFixed(2))+' '+siUnit[i]+'A')
     }
 }
 
 //puts the value of the toggle switch into the devices parameter tree
 function set_enable_k2410(id) {
     var enabled = $('#enable-toggle-'+id).prop('checked');
-    console.log("Setting enabled for " + id + " to " + enabled);
-    $.ajax({
-        type: "PUT",
-        url: '/api/' + api_version + '/gpib/devices/' + id,
-        contentType: "application/json",
-        data: JSON.stringify({'device_control_state': enabled}),
-    });
+    ajax_put(id,'device_control_state',enabled)
 }
 
 function set_output_k2410(id) {
     var toggle = $('#output-toggle-'+id).prop('checked');
-    console.log("Output toggle for " + id + " set to " + toggle);
-    $.ajax({
-        type: "PUT",
-        url: '/api/' + api_version + '/gpib/devices/' + id,
-        contentType: "application/json",
-        data: JSON.stringify({'output_state': toggle}),
-    });
+    ajax_put(id,'output_state',toggle)
 }
 
 function set_ramping_k2410(id) {
@@ -535,23 +473,16 @@ function set_ramping_k2410(id) {
         document.getElementById('row1-'+id).style.display = 'none';
         document.getElementById('row2-'+id).style.display = '';
         document.getElementById('row3-'+id).style.display = '';
-        console.log("Enable ramping");
     } else{
         document.getElementById('row1-'+id).style.display = '';
         document.getElementById('row2-'+id).style.display = 'none';
         document.getElementById('row3-'+id).style.display = 'none';
-        console.log("Disable ramping");
     }
 }
 
 function cancel_ramp(id){
     var value = false
-    $.ajax({
-        type: "PUT",
-        url: '/api/' + api_version + '/gpib/devices/' + id,
-        contentType: "application/json",
-        data: JSON.stringify({'ramping_flag': value}),
-    });
+    ajax_put(id,'ramping_flag',value)
 }
 
 function handle_k2510_update(){
@@ -563,13 +494,15 @@ function handle_k2510_update(){
 
 function update_k2510_elements(id) {
     return function(response) {
-        var retrieved_output_state = (response[id].output_state);
-        if (retrieved_output_state == true){
+
+        (document.getElementById("enable-toggle-"+id)).checked = (response[id].device_control_state);
+        (document.getElementById("output-toggle-"+id)).checked = (response[id].output_state);
+
+        if (response[id].output_state){
             $("#tec-out-state-"+id).html("Enabled");
         } else {
             $("#tec-out-state-"+id).html("Disabled")
         }
-
         
         if (response[id].temp_over_state){
             document.getElementById('reset-temp-'+id).style.display = '';
@@ -577,50 +510,33 @@ function update_k2510_elements(id) {
             document.getElementById('reset-temp-'+id).style.display = 'none';
         }
 
+        K2510_output_list = ["#tec-power-meas-","#curr-temp-meas-","#tec-volt-meas-","#tec-current-meas-","#tec-set-point-","#tec-out-state-"]; 
+        K2510_input_list = ["curr-set-limit-","volt-set-limit-","c_lim_set-","v_lim_set-","temp-set-level-","tp_set-","output-toggle-"];
         var enabled = $('#enable-toggle-'+id).prop('checked');
-        $("#tec-power-meas-"+id).html((parseFloat(response[id].info.tec_power).toFixed(3)));
-        $("#curr-temp-meas-"+id).html((parseFloat(response[id].info.tec_temp_meas).toFixed(3)));
-        $("#tec-volt-meas-"+id).html((parseFloat(response[id].info.tec_voltage).toFixed(3)));
-        $("#tec-current-meas-"+id).html((parseFloat(response[id].info.tec_current).toFixed(3)));
-        $("#tec-set-point-"+id).html((parseFloat(response[id].info.tec_setpoint).toFixed(3)));
-        document.getElementById('temp-set-upper-'+id).disabled = false;
-        document.getElementById('tu_set-'+id).disabled = false;
-        document.getElementById('temp-set-lower-'+id).disabled = false;
-        document.getElementById('tl_set-'+id).disabled = false;
-        document.getElementById('temp-set-level-'+id).disabled = false;
-        document.getElementById('tp_set-'+id).disabled = false; 
-        document.getElementById("output-toggle-"+id).disabled = false;
-        (document.getElementById("enable-toggle-"+id)).checked = (response[id].device_control_state);
-        (document.getElementById("output-toggle-"+id)).checked = (response[id].output_state);
-    
+
         if (enabled == false){
-            $("#tec-power-meas-"+id).html("--");
-            $("#curr-temp-meas-"+id).html("--");
-            $("#tec-volt-meas-"+id).html("--");
-            $("#tec-current-meas-"+id).html("--");
-            $("#tec-set-point-"+id).html("--");
-            $("#tec-out-state-"+id).html("--");
-           
-            document.getElementById('temp-set-upper-'+id).disabled = true;
-            document.getElementById('tu_set-'+id).disabled = true;
-            document.getElementById('temp-set-lower-'+id).disabled = true;
-            document.getElementById('tl_set-'+id).disabled = true;
-            document.getElementById('temp-set-level-'+id).disabled = true;
-            document.getElementById('tp_set-'+id).disabled = true; 
-            document.getElementById("output-toggle-"+id).disabled = true;
-        } 
+            for(x in K2510_output_list){
+                $(K2510_output_list[x]+id).html("--");            
+            }
+            for(x in K2510_input_list){
+                document.getElementById(K2510_input_list[x]+id).disabled = true;
+            }
+        } else {
+            for(x in K2510_input_list){
+                document.getElementById(K2510_input_list[x]+id).disabled = false;
+            }
+            $("#tec-power-meas-"+id).html((parseFloat(response[id].info.tec_power).toFixed(3)));
+            $("#curr-temp-meas-"+id).html((parseFloat(response[id].info.tec_temp_meas).toFixed(3)));
+            $("#tec-volt-meas-"+id).html((parseFloat(response[id].info.tec_voltage).toFixed(3)));
+            $("#tec-current-meas-"+id).html((parseFloat(response[id].info.tec_current).toFixed(3)));
+            $("#tec-set-point-"+id).html((parseFloat(response[id].info.tec_setpoint).toFixed(3)));
+        }
     }
 }
 
 function set_enable_k2510(id){
     var enabled = $('#enable-toggle-'+id).prop('checked');
-    console.log("Setting enabled for " + id + " to " + enabled);
-    $.ajax({
-        type: "PUT",
-        url: '/api/' + api_version + '/gpib/devices/' + id,
-        contentType: "application/json",
-        data: JSON.stringify({'device_control_state': enabled}),
-    });
+    ajax_put(id,'device_control_state',enabled)
 }
 
 //Obtains the entered voltage level value, performs validation and sends it to the 
@@ -631,35 +547,9 @@ function set_voltage_level(element_id,id){
 
     if (regexVolt.test(v_input_box.value)){
         $.getJSON('/api/' + api_version + '/gpib/devices/' + id + '/voltage', function(response) {
-
-        var volt_curr_range = response.voltage.voltage_curr_range;
-        console.log(volt_curr_range);
-        if (volt_curr_range == 0.21){
-            if (v_input_box.value < -0.21){ v_input_box.value = -0.21;}
-            if (v_input_box.value > 0.21) {v_input_box.value = 0.21;}
-        } 
-        if (volt_curr_range == 2.10){
-            if (v_input_box.value < -2.1){ v_input_box.value = -2.1;}
-            if (v_input_box.value > 2.1) {v_input_box.value = 2.1;}
-        }
-        if (volt_curr_range == 21.00){
-            if (v_input_box.value < -21){ v_input_box.value = -21;}
-            if (v_input_box.value > 21) {v_input_box.value = 21;}
-        }
-        if (volt_curr_range == 1100){
-            if (v_input_box.value < -1100){ v_input_box.value = -1100;}
-            if (v_input_box.value > 1100) {v_input_box.value = 1100;}
-        }
-
-    var v_in = document.getElementById('volt-set-level-'+id).value;
-    var voltage = parseFloat(v_in);
-
-    $.ajax({
-        type: "PUT",
-        url: '/api/' + api_version + '/gpib/devices/' + id + '/voltage',
-        contentType: "application/json",
-        data: JSON.stringify({'voltage_set': voltage})  }); 
-    });        
+        voltage_validation_check(v_input_box,response.voltage.voltage_curr_range)
+    var voltage = parseFloat(document.getElementById('volt-set-level-'+id).value);
+    ajax_put(id+'/voltage','voltage_set',voltage) });        
     } else {
         v_input_box.value = "";
     }
@@ -672,27 +562,9 @@ function set_voltage_ramp_level(volt_id,time_id,id){
     var regexTime = /^\d+$/;
 
     if (regexVolt.test(vr_input_box.value) && regexTime.test(tr_input_box.value)){
-        console.log("test passed");
         $.getJSON('/api/' + api_version + '/gpib/devices/' + id, function(response) {
 
-        var volt_curr_range = response[id].voltage.voltage_curr_range;
-        console.log(volt_curr_range);
-        if (volt_curr_range == 0.21){
-            if (vr_input_box.value < -0.21){ vr_input_box.value = -0.21;}
-            if (vr_input_box.value > 0.21) {vr_input_box.value = 0.21;}
-        } 
-        if (volt_curr_range == 2.10){
-            if (vr_input_box.value < -2.1){ vr_input_box.value = -2.1;}
-            if (vr_input_box.value > 2.1) {vr_input_box.value = 2.1;}
-        }
-        if (volt_curr_range == 21.00){
-            if (vr_input_box.value < -21){ vr_input_box.value = -21;}
-            if (vr_input_box.value > 21) {vr_input_box.value = 21;}
-        }
-        if (volt_curr_range == 1100){
-            if (vr_input_box.value < -1100){ vr_input_box.value = -1100;}
-            if (vr_input_box.value > 1100) {vr_input_box.value = 1100;}
-        }
+        voltage_validation_check(vr_input_box,response[id].voltage.voltage_curr_range)
 
         if (tr_input_box.value < 1){ tr_input_box.value = 1;}
         if (tr_input_box.value > 600){ tr_input_box.value = 600;}
@@ -700,46 +572,49 @@ function set_voltage_ramp_level(volt_id,time_id,id){
         var voltage = parseFloat(document.getElementById(volt_id).value);
         var time = parseInt(document.getElementById(time_id).value);
 
-        console.log(voltage, time)
-        console.log(voltage,time);
-        console.log("Sending time")
-       
         $.ajax({
             type: "PUT",
             url: '/api/' + api_version + '/gpib/devices/' + id + '/voltage',
             contentType: "application/json",
             data: JSON.stringify({'voltage_time': time}), 
             success: function(data){
-                console.log("sent time")
-                console.log("sending voltage")
                 $.ajax({
                     type: "PUT",
                     url: '/api/' + api_version + '/gpib/devices/' + id + '/voltage',
                     contentType: "application/json",
                     async: false,
-                    data: JSON.stringify({'voltage_ramp_set': voltage}) , 
-                    success: function(data){
-                        console.log("sent voltage")
-                    }});
+                    data: JSON.stringify({'voltage_ramp_set': voltage})});
             }});
     })
     } else {
         vr_input_box.value = "";
         tr_input_box.value = "";
-        console.log("test failed");
+    }
+}
+
+function voltage_validation_check(input_box,range){
+    if (range == 0.21){
+        if (input_box.value < -0.21){input_box.value = -0.21;}
+        if (input_box.value > 0.21) {input_box.value = 0.21;}
+    } 
+    if (range == 2.10){
+        if (input_box.value < -2.1){input_box.value = -2.1;}
+        if (input_box.value > 2.1) {input_box.value = 2.1;}
+    }
+    if (range == 21.00){
+        if (input_box.value < -21){input_box.value = -21;}
+        if (input_box.value > 21) {input_box.value = 21;}
+    }
+    if (range == 1100){
+        if (input_box.value < -1100){input_box.value = -1100;}
+        if (input_box.value > 1100) {input_box.value = 1100;}
     }
 }
 
 //sets the voltage range from on a value selected from a dropdown 
 function set_voltage_range(id){
     var r_in = document.getElementById('volt-set-range-'+ id).value;
-
-    $.ajax({
-        type: "PUT",
-        url: '/api/' + api_version + '/gpib/devices/' + id + '/voltage',
-        contentType: "application/json",
-        data: JSON.stringify({'voltage_range': r_in})
-    });
+    ajax_put(id+'/voltage','voltage_range',r_in)
 }
 
 //obtains the entered compliance current value, performs validation and sends it to the
@@ -749,14 +624,8 @@ function set_current_comp(element_id,id){
     var regexCurr = /^\d+(\.\d{1,3})?$/;
     if (regexCurr.test(c_input_box.value)){
         if (c_input_box.value > 1000){c_input_box.value = 1000}
-        var cc_in = document.getElementById('curr-set-comp-'+id).value;
-        var curr_comp = parseFloat(cc_in);
-        $.ajax({
-            type: "PUT",
-            url: '/api/' + api_version + '/gpib/devices/' + id + '/current',
-            contentType: "application/json",
-            data: JSON.stringify({'current_comp_set': curr_comp})
-        });
+        var curr_comp = parseFloat(document.getElementById('curr-set-comp-'+id).value);
+        ajax_put(id+'/current','current_comp_set',curr_comp)
     } else {
         c_input_box.value = "";
     }
@@ -779,16 +648,8 @@ function set_filter_count(element_id,id){
                 if (f_input_box.value < 1){ f_input_box.value = 1;}
                 if (f_input_box.value > 10){ f_input_box.value = 10;}
             }      
-            var fc_in = document.getElementById('filt-set-count-'+id).value;
-            var filt_count = parseInt(fc_in);
-
-            $.ajax({
-                type: "PUT",
-                url: '/api/' + api_version + '/gpib/devices/' + id + '/filter',
-                contentType: "application/json",
-                data: JSON.stringify({'filter_count': filt_count})
-                })
-    })
+            var filt_count = parseInt(document.getElementById('filt-set-count-'+id).value);
+            ajax_put(id+'/filter','filter_count',filt_count) })
     } else {
         f_input_box.value = "";
     }
@@ -797,13 +658,7 @@ function set_filter_count(element_id,id){
 //obtains the most up to date value of the filter state in the parameter tree
 function set_filter_state(id){
     var fs_in = document.getElementById('filt-set-state-'+id).value;
-
-    $.ajax({
-        type: "PUT",
-        url: '/api/' + api_version + '/gpib/devices/' + id + '/filter',
-        contentType: "application/json",
-        data: JSON.stringify({'filter_enable': fs_in}) 
-    })
+    ajax_put(id+'/filter','filter_enable',fs_in)
 }
 
 //obtains the most up to date value of the filter type in the paramter tree
@@ -813,54 +668,31 @@ function set_filter_type(id){
         var curr_count = document.getElementById('filt-curr-count-'+id).innerHTML;
         if (curr_count > 10){
             var filt_count = 10;
-            $.ajax({
-                type: "PUT",
-                url: '/api/' + api_version + '/gpib/devices/' + id + '/filter',
-                contentType: "application/json",
-                data: JSON.stringify({'filter_count': filt_count})
-                });
+            ajax_put(id+'/filter','filter_count',filt_count)
             };
         }
-    
-    $.ajax({
-        type: "PUT",
-        url: '/api/' + api_version + '/gpib/devices/' + id + '/filter',
-        contentType : "application/json", 
-        data: JSON.stringify({'filter_type': ft_in})
-    })
+    ajax_put(id+'/filter','filter_type',ft_in)
 }
 
 /////////////////////////  K2510 Functions  /////////////////////////////
 
-function set_up_temp_level(element_id,id){
+function set_current_limit(element_id,id){
     var input_box = (document.getElementById(element_id));
     var regexCurr = /^-?\d+(\.\d{1,3})?$/;
     if (regexCurr.test(input_box.value)){    
-        var v_in = document.getElementById('temp-set-upper-'+id).value;
-        var temp_up = parseFloat(v_in);
-
-        $.ajax({
-            type: "PUT",
-            url: '/api/' + api_version + '/gpib/devices/' + id + '/temp',
-            contentType: "application/json",
-            data: JSON.stringify({'temp_up_limit': temp_up})  });
+        var curr_lim = parseFloat(document.getElementById('curr-set-limit-'+id).value);
+        ajax_put(id+'/set','c_lim_set',curr_lim)
     } else {
         input_box.value = "";
     }        
 }
 
-function set_down_temp_level(element_id,id){
+function set_voltage_limit(element_id,id){
     var input_box = (document.getElementById(element_id));
     var regexCurr = /^-?\d+(\.\d{1,3})?$/;
     if (regexCurr.test(input_box.value)){
-        var v_in = document.getElementById('temp-set-lower-'+id).value;
-        var temp_down = parseFloat(v_in);
-
-        $.ajax({
-            type: "PUT",
-            url: '/api/' + api_version + '/gpib/devices/' + id + '/temp',
-            contentType: "application/json",
-            data: JSON.stringify({'temp_down_limit': temp_down})  }); 
+        var volt_lim = parseFloat(document.getElementById('volt-set-limit-'+id).value);
+        ajax_put(id+'/set','v_lim_set',volt_lim) 
     } else {
         input_box.value = "";
     }       
@@ -869,15 +701,9 @@ function set_down_temp_level(element_id,id){
 function set_temp_level(element_id,id){
     var input_box = (document.getElementById(element_id));
     var regexCurr = /^-?\d+(\.\d{1,3})?$/;
-    if (regexCurr.test(input_box.value)){
-        //if (input_box.value > ) {input_box.value = 1000};
-        var v_in = document.getElementById('temp-set-level-'+id).value;
-        var temp = parseFloat(v_in);
-        $.ajax({
-            type: "PUT",
-            url: '/api/' + api_version + '/gpib/devices/' + id + '/temp',
-            contentType: "application/json",
-            data: JSON.stringify({'temp_set': temp})  }); 
+    if (regexCurr.test(input_box.value)){        
+        var temp = parseFloat(document.getElementById('temp-set-level-'+id).value);
+        ajax_put((id+'/set/'),'temp_set',temp);
     } else {
         input_box.value = "";
     }     
@@ -885,21 +711,22 @@ function set_temp_level(element_id,id){
 
 function set_output_k2510(id){
     var toggle = $('#output-toggle-'+id).prop('checked');
-    console.log("Output toggle for " + id + " set to " + toggle);
-    $.ajax({
-        type: "PUT",
-        url: '/api/' + api_version + '/gpib/devices/' + id,
-        contentType: "application/json",
-        data: JSON.stringify({'output_state': toggle}),
-    });
+    ajax_put(id,'output_state',toggle);
 }
 
 function set_over_temp(id){
     var value = false
+    ajax_put(id,'temp_over_state',value);
+}
+
+function ajax_put(path,key,value){
+    let data = {};
+    data[key] = value;
+    console.log(data,"data in ajax_put",JSON.stringify(data))
     $.ajax({
         type: "PUT",
-        url: '/api/' + api_version + '/gpib/devices/' + id,
+        url: '/api/' + api_version + '/gpib/devices/' + path,
         contentType: "application/json",
-        data: JSON.stringify({'temp_over_state': value}),
+        data: JSON.stringify(data),
     });
 }

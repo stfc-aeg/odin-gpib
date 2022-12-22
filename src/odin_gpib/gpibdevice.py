@@ -29,12 +29,14 @@ class GpibDevice():
     def write(self, cmd):
         if self.device_control_enable:  
             with self.lock:
-                ret = self.device.write(cmd)
-                return ret
+                self.device.write(cmd)
+                #ret = self.device.write(cmd)
+                #return ret
         if (":SYSTEM:KEY" in cmd):
             with self.lock:
-                ret = self.device.write(cmd)
-                return ret 
+                self.device.write(cmd)
+                #ret = self.device.write(cmd)
+                #return ret 
 
     def query(self, cmd):
         if self.device_control_enable:

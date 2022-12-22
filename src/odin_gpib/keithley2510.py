@@ -12,15 +12,17 @@ class K2510(GpibDevice):
         super().__init__(device, ident, lock)
         self.type = 'K2510'
 
-        self.temp_up_limit = 20.0 
-        self.temp_down_limit = 10.0
-        self.temp_setpoint = 15.0
+        self.current_limit = 0.0
+        self.voltage_limit = 0.0
+        self.temp_setpoint = 0.0
 
         self.tec_power = 0.0
         self.tec_current = 0.0
         self.tec_voltage = 0.0
         self.tec_temp_meas = 0.0
         self.tec_setpoint = 0.0
+        self.tec_volt_lim = 0.0
+        self.tec_curr_lim = 0.0
 
         self.device_control_enable = True
         self.output_state = False
@@ -35,9 +37,9 @@ class K2510(GpibDevice):
         
         print("OUTPUT: ",self.output_state)
 
-        temp_controls = ParameterTree({
-            'temp_up_limit': (lambda: self.temp_up_limit, self.set_temp_up),
-            'temp_down_limit': (lambda: self.temp_down_limit, self.set_temp_down),
+        setpoints = ParameterTree({
+            'c_lim_set': (lambda: self.current_limit, self.set_current_limit),
+            'v_lim_set': (lambda: self.voltage_limit, self.set_voltage_limit),
             'temp_set': (lambda: self.temp_setpoint, self.set_temp_point)
         })
 
@@ -46,7 +48,9 @@ class K2510(GpibDevice):
             'tec_current': (lambda: self.tec_current, None),
             'tec_voltage': (lambda: self.tec_voltage, None),
             'tec_temp_meas': (lambda: self.tec_temp_meas, None),
-            'tec_setpoint': (lambda: self.tec_setpoint, None)
+            'tec_setpoint': (lambda: self.tec_setpoint, None),
+            'tec_volt_lim': (lambda: self.tec_volt_lim, None),
+            'tec_curr_lim': (lambda: self.tec_curr_lim, None)
         })
 
         self.param_tree = ParameterTree({
@@ -56,12 +60,27 @@ class K2510(GpibDevice):
             'type': (lambda: self.type, None),
             'ident': (lambda: self.ident, None),
             'address': (lambda: self.bus_address, None),
-            'temp': temp_controls,
+            'set': setpoints,
             'info': tec_information
         })
 
     def set_temp_over_state(self, temp_state):
-        self.temp_over_state = temp_state       
+        self.temp_over_state = temp_state 
+
+    def get_tec_volt_lim(self):
+        volt_lim = (self.query_ascii_values(':SOUR:VOLT:PROT?'))
+        if (volt_lim == None):
+            pass
+        else:
+            self.tec_volt_lim = ("{:.6f}".format(float(volt_lim[0])))    
+
+    def get_tec_curr_lim(self):
+        curr_lim = (self.query_ascii_values(':SENS:CURR:PROT?'))
+        if (curr_lim == None):
+            pass
+        else:
+            self.tec_curr_lim = ("{:.6f}".format(float(curr_lim[0])))
+        
 
     def get_tec_power(self):
         tec_power = (self.query_ascii_values(':MEAS:POW?'))
@@ -118,15 +137,15 @@ class K2510(GpibDevice):
     def set_temp_unit(self):
         self.write(':UNIT:TEMP CEL')
 
-    def set_temp_up(self, temp_up_limit):
-        self.temp_up_limit = temp_up_limit
-        temp_up_limit = str(temp_up_limit)
-        self.write((':SOUR:TEMP:PROT %s' %temp_up_limit))
+    def set_current_limit(self, current_limit):
+        self.current_limit = current_limit
+        current_limit = str(current_limit)
+        self.write((':SENS:CURR:PROT %s' %current_limit))
 
-    def set_temp_down(self, temp_down_limit):
-        self.temp_down_limit = temp_down_limit
-        temp_down_limit = str(temp_down_limit)
-        self.write((':SOUR:TEMP:PROT:LOW %s' %temp_down_limit))
+    def set_voltage_limit(self, voltage_limit):
+        self.voltage_limit = voltage_limit
+        voltage_limit = str(voltage_limit)
+        self.write((':SOUR:VOLT:PROT %s' %voltage_limit))
 
     def set_temp_point(self, temp_setpoint):
         self.temp_setpoint = temp_setpoint
@@ -157,3 +176,5 @@ class K2510(GpibDevice):
             self.get_tec_power()
             self.get_tec_temp_meas()
             self.get_tec_setpoint()
+            self.get_tec_volt_lim()
+            self.get_tec_curr_lim()
