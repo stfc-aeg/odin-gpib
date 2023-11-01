@@ -59,7 +59,7 @@ function call_device_functions(id_list){
 function create_K2410_interfaces(){
     var K2410_html = "";
     for (let x in K2410_devices) {
-        var id = K2410_devices[x];        
+        var id = K2410_devices[x];
         K2410_html += `
         <div class = "instrument-panel">
         <div class = "device-label">
@@ -72,25 +72,25 @@ function create_K2410_interfaces(){
                     <label class = "switch">
                     <input type="checkbox" onclick="set_enable_k2410('${id}')" id="enable-toggle-${id}">
                     <span class="slider"> </span>
-                    </label>   
+                    </label>
                 </div>
                 <div>
                     <label class = "switch-label" for = "output-toggle-${id}">
                     <p>Enable output&nbsp&nbsp&nbsp</p>
                     </label>
-                    <label class = "switch">                        
+                    <label class = "switch">
                     <input class type="checkbox" onclick="set_output_k2410('${id}')" id="output-toggle-${id}">
                     <span class="slider"> </span>
-                    </label>                           
+                    </label>
                 </div>
                 <div>
                     <label class = "switch-label" for = "ramping-toggle-${id}">
                     <p>Enable ramping</p>
                     </label>
-                    <label class = "switch">                        
+                    <label class = "switch">
                     <input class type="checkbox" onclick="set_ramping_k2410('${id}')" id="ramping-toggle-${id}">
                     <span class="slider"> </span>
-                    </label>                           
+                    </label>
                 </div>
             </div>
         </div>
@@ -104,8 +104,8 @@ function create_K2410_interfaces(){
                         <select id = "filt-set-state-${id}" onChange="set_filter_state('${id}')">
                         <option value="" selected disabled hidden> </option>
                         <option value = "1">Enable filter</option>
-                        <option value = "0">Disable filter</option> 
-                    </select> 
+                        <option value = "0">Disable filter</option>
+                    </select>
                 </td>
             </tr>
             <tr>
@@ -114,8 +114,8 @@ function create_K2410_interfaces(){
                     <select id = "filt-set-type-${id}" onChange="set_filter_type('${id}')">
                         <option value="" selected disabled hidden> </option>
                         <option value = "MOV">Moving filter</option>
-                        <option value = "REP">Repeating filter</option> 
-                    </select> 
+                        <option value = "REP">Repeating filter</option>
+                    </select>
                 </td>
             </tr>
             <tr>
@@ -125,7 +125,7 @@ function create_K2410_interfaces(){
                         <label for ="filt-set-count-${id}"> Filter length</label>
                         <input id="filt-set-count-${id}" type="text"/>
                         <input type="button" id="fc_set-${id}" value="Set" onclick="set_filter_count('filt-set-count-${id}','${id}')"/>
-                    </form> 
+                    </form>
                 </td>
             </tr>
         </tbody>
@@ -149,42 +149,42 @@ function create_K2410_interfaces(){
                     <select id = "volt-set-range-${id}" onChange="set_voltage_range('${id}')">
                     <option value="" selected disabled hidden> </option>
                         <option value = "0.21">mV range</option>
-                        <option value = "2.1">2.1V range</option> 
+                        <option value = "2.1">2.1V range</option>
                         <option value = "21">21V range</option>
                         <option value = "1100">KV range</option>
-                    </select> 
+                    </select>
                 </td>
             </tr>
             <tr id="row1-${id}">
                 <th> Set voltage level:  </th>
-                <td>         
+                <td>
                     <form>
                         <label for ="volt-set-level-${id}"> Voltage: </label>
                         <input id="volt-set-level-${id}" type="text"/>
                         <input type = "button" id="vl_set-${id}" value="Set" onclick="set_voltage_level('volt-set-level-${id}','${id}')" />
-                    </form> 
+                    </form>
                 </td>
             </tr>
             <tr id="row2-${id}">
             <th> Set voltage level:  </th>
-            <td>         
+            <td>
                 <form>
                     <label for ="volt-ramp-set-level-${id}"> Voltage: </label>
                     <input id="volt-ramp-set-level-${id}" type="text"/>
                     <input type = "button" id="vlr_set-${id}" value="Set" onclick="set_voltage_ramp_level('volt-ramp-set-level-${id}','time-to-set-${id}','${id}')" />
                     <input type = "button" id="vr_cancel-${id}" value="Cancel" onclick="cancel_ramp('${id}')" />
-                </form> 
+                </form>
             </td>
         </tr>
         <tr id="row3-${id}">
         <th> Time to reach voltage (S):  </th>
-        <td>         
+        <td>
             <form>
                 <label for ="time-to-set-${id}"> Time: </label>
                 <input id="time-to-set-${id}" type="text"/>
-            </form> 
+            </form>
         </td>
-    </tr>            
+    </tr>
         </tbody>
         </table>
         </div>
@@ -194,7 +194,7 @@ function create_K2410_interfaces(){
         <tbody>
             <tr>
                 <th> Current measured: </th>
-                <td> <span id="curr-meas-${id}"></span></td>                
+                <td> <span id="curr-meas-${id}"></span></td>
             </tr>
             <tr>
                 <th> Compliance current: </th>
@@ -202,7 +202,7 @@ function create_K2410_interfaces(){
             </tr>
             <tr>
                 <th> Set compliance current:  </th>
-                <td>                     
+                <td>
                     <form>
                         <label for ="curr-set-comp-${id}"> Compliance (mA): </label>
                         <input id="curr-set-comp-${id}" type="text"/>
@@ -216,7 +216,7 @@ function create_K2410_interfaces(){
         </div>
         </div>
         `
-        $("#K2410test").html(K2410_html);         
+        $("#K2410test").html(K2410_html);
     }
     for (let x in K2410_devices) {
         var id = K2410_devices[x];
@@ -233,11 +233,11 @@ function set_ramping_inital(id){
 
 //iterates through the list of K2510 devices and generates a new div containing the controls for that
 //device, all the html id's are generated using the ID of the device to uniquely identify them and relate
-//them back to that device, so they can be addressed by the rest of the program. 
+//them back to that device, so they can be addressed by the rest of the program.
 function create_K2510_interfaces(){
     var K2510_html = "";
     for (let x in K2510_devices) {
-        var id = K2510_devices[x];        
+        var id = K2510_devices[x];
         K2510_html += `
         <div class = "instrument-panel">
         <div class = "device-label">
@@ -250,20 +250,20 @@ function create_K2510_interfaces(){
                     <label class = "switch">
                         <input type="checkbox" onclick="set_enable_k2510('${id}')" id="enable-toggle-${id}">
                         <span class="slider"> </span>
-                    </label>    
+                    </label>
                 </div>
 
                 <div>
                     <label class = "switch-label" for = "output-toggle-${id}">
                     <p>Enable output</p>
                     </label>
-                    <label class = "switch">                        
+                    <label class = "switch">
                     <input type="checkbox" onclick="set_output_k2510('${id}')" id="output-toggle-${id}">
                     <span class="slider"> </span>
-                    </label>                           
+                    </label>
                 </div>
                     <div>
-                        <button onclick="set_over_temp('${id}')" id="reset-temp-${id}">Reset over_temp state</button>  
+                        <button onclick="set_over_temp('${id}')" id="reset-temp-${id}">Reset over_temp state</button>
                     </div>
             </div>
         </div>
@@ -303,7 +303,7 @@ function create_K2510_interfaces(){
         <tbody>
             <tr>
                 <th> Set current limit:  </th>
-                <td>         
+                <td>
                     <form>
                         <label for ="curr-set-limit-${id}"> Current: </label>
                         <input id="curr-set-limit-${id}" type="text"/>
@@ -313,29 +313,29 @@ function create_K2510_interfaces(){
             </tr>
             <tr>
             <th> Set voltage limit:  </th>
-            <td>         
+            <td>
                 <form>
                     <label for ="volt-set-limit-${id}"> Voltage: </label>
                     <input id="volt-set-limit-${id}" type="text"/>
                     <input type = "button" id="v_lim_set-${id}" value="Set" onclick="set_voltage_limit('volt-set-limit-${id}','${id}')" />
-                </form> 
+                </form>
             </td>
             </tr>
             </tr>
             <tr>
             <th> Set temp level:  </th>
-            <td>         
+            <td>
                 <form>
                     <label for ="temp-set-level-${id}"> Temp: </label>
                     <input id="temp-set-level-${id}" type="text"/>
                     <input type = "button" id="tp_set-${id}" value="Set" onclick="set_temp_level('temp-set-level-${id}','${id}')" />
-                </form> 
+                </form>
             </td>
-        </tr>   
+        </tr>
         </tbody>
         </table>
         </li>
- 
+
         </ul>
         </div>
         `
@@ -344,7 +344,7 @@ function create_K2510_interfaces(){
     poll_update_k2510_elements();
 }
 
-//periodically calls a function to update k2410 elements 
+//periodically calls a function to update k2410 elements
 function poll_update_k2410_elements(){
     handle_k2410_update();
    setTimeout(poll_update_k2410_elements, 500)
