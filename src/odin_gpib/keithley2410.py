@@ -30,8 +30,11 @@ class K2410(GpibDevice):
         
         print("OUTPUT: ",self.output_state)
 
-        self.device_control_enable = True 
-        self.ramping_flag = False 
+        self.device_control_enable = True
+        self.ramping_flag = False
+        self.identify = False
+        self.write(':DISP:WINDOW1:TEXT:STAT 0')
+        self.write(':DISP:WINDOW2:TEXT:STAT 0')
 
         self.filter_set_enable = ""
         self.filter_set_type = ""
@@ -79,6 +82,7 @@ class K2410(GpibDevice):
             'output_state': (lambda: self.output_state, self.set_output_state),
             'device_control_state': (lambda: self.device_control_enable, self.set_control_enable),
             'ramping_flag': (lambda: self.ramping_flag, self.set_ramping_flag),
+            'identify': (lambda: self.identify, self.set_identify),
             'type': (lambda: self.type, None),
             'ident': (lambda: self.ident, None),
             'address': (lambda: self.bus_address, None),
@@ -86,6 +90,7 @@ class K2410(GpibDevice):
             'voltage': voltage_controls,
             'current': current_controls
             })
+
     def set_time(self, time):
         self.voltage_time = time
     
@@ -116,6 +121,23 @@ class K2410(GpibDevice):
         self.device_control_enable = device_control_enable
         if (self.device_control_enable == False):
             self.write(':SYSTEM:KEY 23')
+
+    def set_identify(self, identify):
+        self.identify = identify
+        #ident = self.ident
+        # If identify toggle turned on, display the identify message on the screen.
+        # To do this, message state needs to be turned on.
+        # Max character length for top display message = 12 characters
+        # Max character length for bottom display message = 32 characters
+        if (self.identify == True):
+            self.write(':DISP:WINDOW1:TEXT:DATA "Identify"')
+            self.write(':DISP:WINDOW1:TEXT:STAT 1')
+            self.write(':DISP:WINDOW2:TEXT:DATA "Bottom Text - Yay"')
+            self.write(':DISP:WINDOW2:TEXT:STAT 1')
+        # Else, disable the message state to remove the message
+        else:
+            self.write(':DISP:WINDOW1:TEXT:STAT 0')
+            self.write(':DISP:WINDOW2:TEXT:STAT 0')
                                                
     def get_voltage_measurement(self):
         voltage_meas = (self.query_ascii_values(':MEAS:VOLT?'))

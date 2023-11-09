@@ -92,6 +92,15 @@ function create_K2410_interfaces(){
                     <span class="slider"> </span>
                     </label>
                 </div>
+                <div>
+                    <label class = "switch-label" for = "identify-toggle-${id}">
+                    <p>Identify</p>
+                    </label>
+                    <label class = "switch">
+                    <input class type="checkbox" onclick="identify_k2410('${id}')" id="identify-toggle-${id}">
+                    <span class="slider"> </span>
+                    </label>
+                </div>
             </div>
         </div>
         <div class="row">
@@ -262,9 +271,18 @@ function create_K2510_interfaces(){
                     <span class="slider"> </span>
                     </label>
                 </div>
-                    <div>
-                        <button onclick="set_over_temp('${id}')" id="reset-temp-${id}">Reset over_temp state</button>
-                    </div>
+                <div>
+                    <label class = "switch-label" for = "identify-toggle-${id}">
+                    <p>Identify</p>
+                    </label>
+                    <label class = "switch">
+                    <input class type="checkbox" onclick="identify_k2510('${id}')" id="identify-toggle-${id}">
+                    <span class="slider"> </span>
+                    </label>
+                </div>
+                <div>
+                    <button onclick="set_over_temp('${id}')" id="reset-temp-${id}">Reset over_temp state</button>
+                </div>
             </div>
         </div>
         <ul class="row">
@@ -368,6 +386,7 @@ function update_k2410_elements(id) {
     return function(response) {
         (document.getElementById("enable-toggle-"+id)).checked = (response[id].device_control_state);
         (document.getElementById("output-toggle-"+id)).checked = (response[id].output_state);
+        (document.getElementById("identify-toggle-" + id)).checked = (response[id].identify);
         // Section of code runs for each K2410 device when the page is loaded
         if (up_i<(K2410_devices.length)){
             //Sets the inital state of the dropdowns so that they are in sync with the adapter state
@@ -480,6 +499,11 @@ function set_ramping_k2410(id) {
     }
 }
 
+function identify_k2410(id) {
+    var toggle = $('#identify-toggle-' + id).prop('checked');
+    ajax_put(id, 'identify', toggle)
+}
+
 function cancel_ramp(id){
     var value = false
     ajax_put(id,'ramping_flag',value)
@@ -497,6 +521,7 @@ function update_k2510_elements(id) {
 
         (document.getElementById("enable-toggle-"+id)).checked = (response[id].device_control_state);
         (document.getElementById("output-toggle-"+id)).checked = (response[id].output_state);
+        (document.getElementById("identify-toggle-" + id)).checked = (response[id].identify);
 
         if (response[id].output_state){
             $("#tec-out-state-"+id).html("Enabled");
@@ -717,6 +742,11 @@ function set_output_k2510(id){
 function set_over_temp(id){
     var value = false
     ajax_put(id,'temp_over_state',value);
+}
+
+function identify_k2510(id) {
+    var toggle = $('#identify-toggle-' + id).prop('checked');
+    ajax_put(id, 'identify', toggle)
 }
 
 function ajax_put(path,key,value){
