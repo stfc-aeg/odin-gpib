@@ -27,12 +27,11 @@ class K2410(GpibDevice):
             self.output_state = True
         if ("0" in output_init_state):
             self.output_state = False
-        
+
         print("OUTPUT: ",self.output_state)
 
         self.device_control_enable = True
         self.ramping_flag = False
-        self.identify = False
         self.write(':DISP:WINDOW1:TEXT:STAT 0')
         self.write(':DISP:WINDOW2:TEXT:STAT 0')
 
@@ -53,13 +52,13 @@ class K2410(GpibDevice):
         self.current_comp_setpoint = 0.0
         self.current_meas = 0.0
         self.current_curr_comp = 0.0
-        
+
         filter_controls = ParameterTree({
             'filter_enable' : (lambda: self.filter_set_enable, self.set_filter_enable),
             'filter_type' : (lambda: self.filter_set_type, self.set_filter_type),
             'filter_count' : (lambda: self.filter_count_setpoint, self.set_filter_count),
             'filter_curr_type' : (lambda: self.filter_curr_type, None),
-            'filter_curr_count' : (lambda: self.filter_curr_count, None),            
+            'filter_curr_count' : (lambda: self.filter_curr_count, None),
             'filter_state' : (lambda: self.filter_curr_state, None)
         })
 
@@ -93,7 +92,7 @@ class K2410(GpibDevice):
 
     def set_time(self, time):
         self.voltage_time = time
-    
+
     def set_ramping_flag(self,flag):
         self.ramping_flag = flag
 
@@ -106,7 +105,7 @@ class K2410(GpibDevice):
                 self.output_state = True
             if ("0" in output_state):
                 self.output_state = False
-    
+
     def set_output_state(self, output_state):
         if output_state == False:
             output_state = "OFF"
@@ -122,23 +121,6 @@ class K2410(GpibDevice):
         if (self.device_control_enable == False):
             self.write(':SYSTEM:KEY 23')
 
-    def set_identify(self, identify):
-        self.identify = identify
-        #ident = self.ident
-        # If identify toggle turned on, display the identify message on the screen.
-        # To do this, message state needs to be turned on.
-        # Max character length for top display message = 12 characters
-        # Max character length for bottom display message = 32 characters
-        if (self.identify == True):
-            self.write(':DISP:WINDOW1:TEXT:DATA "Identify"')
-            self.write(':DISP:WINDOW1:TEXT:STAT 1')
-            self.write(':DISP:WINDOW2:TEXT:DATA "Bottom Text - Yay"')
-            self.write(':DISP:WINDOW2:TEXT:STAT 1')
-        # Else, disable the message state to remove the message
-        else:
-            self.write(':DISP:WINDOW1:TEXT:STAT 0')
-            self.write(':DISP:WINDOW2:TEXT:STAT 0')
-                                               
     def get_voltage_measurement(self):
         voltage_meas = (self.query_ascii_values(':MEAS:VOLT?'))
         if (voltage_meas == None):
@@ -152,7 +134,7 @@ class K2410(GpibDevice):
             pass
         else:
             self.voltage_curr_range = voltage_curr_range
-        
+
     def get_filter_state(self):
         filter_curr_state = (self.query(':SENS:AVER:STAT?'))
         if (filter_curr_state == None):
@@ -170,7 +152,7 @@ class K2410(GpibDevice):
         if (filter_curr_count == None):
             pass
         else:
-            self.filter_curr_count = filter_curr_count        
+            self.filter_curr_count = filter_curr_count
 
     def get_filter_curr_type(self):
         filter_curr_type = (self.query(':SENS:AVER:TCON?'))
@@ -183,7 +165,7 @@ class K2410(GpibDevice):
             elif "REP" in self.filter_curr_type:
                 self.filter_curr_type = "Repeating"
             else: 
-                pass        
+                pass
 
     def get_current_measurement(self):
         current_meas = (self.query_ascii_values(':MEAS:CURR?'))
@@ -233,7 +215,7 @@ class K2410(GpibDevice):
 
     def update(self):
         self.get_output_state()
-        if (self.output_state) and (self.device_control_enable):       
+        if (self.output_state) and (self.device_control_enable):
             self.get_filter_state()
             self.get_filter_curr_count()
             self.get_filter_curr_type()
@@ -261,18 +243,16 @@ class K2410(GpibDevice):
                     count = setpoint
                 v_set = str(count)
                 self.write((':SOUR:VOLT:LEV %s' %v_set))
-                
                 time.sleep(1)
 
-        if increment > 0: 
-            count = volt_measurement 
+        if increment > 0:
+            count = volt_measurement
             while ((count < setpoint) and self.ramping_flag):
                 count += increment
                 if count > setpoint:
                     count = setpoint
                 v_set = str(count)
                 self.write((':SOUR:VOLT:LEV %s' %v_set))
-                
                 time.sleep(1)
 
         self.ramping_flag = False

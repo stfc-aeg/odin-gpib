@@ -65,6 +65,7 @@ function create_K2410_interfaces(){
         <div class = "device-label">
             <div class = "container-fluid">
                 <div> Keithley 2410 power supply: ${id}</div>
+
                 <div>
                     <label class = "switch-label" for = "enable-toggle-${id}">
                     <p>Enable control&nbsp&nbsp</p>
@@ -74,6 +75,7 @@ function create_K2410_interfaces(){
                     <span class="slider"> </span>
                     </label>
                 </div>
+
                 <div>
                     <label class = "switch-label" for = "output-toggle-${id}">
                     <p>Enable output&nbsp&nbsp&nbsp</p>
@@ -83,6 +85,7 @@ function create_K2410_interfaces(){
                     <span class="slider"> </span>
                     </label>
                 </div>
+
                 <div>
                     <label class = "switch-label" for = "ramping-toggle-${id}">
                     <p>Enable ramping</p>
@@ -92,6 +95,7 @@ function create_K2410_interfaces(){
                     <span class="slider"> </span>
                     </label>
                 </div>
+
                 <div>
                     <label class = "switch-label" for = "identify-toggle-${id}">
                     <p>Identify</p>
@@ -252,9 +256,10 @@ function create_K2510_interfaces(){
         <div class = "device-label">
             <div class = "container-fluid">
                 <div> Keithley 2510 Peltier Controller: ${id}</div>
+
                 <div>
                     <label class = "switch-label" for = "enable-toggle-${id}">
-                    Enable control&nbsp&nbsp
+                    <p>Enable control</p>
                     </label>
                     <label class = "switch">
                         <input type="checkbox" onclick="set_enable_k2510('${id}')" id="enable-toggle-${id}">
@@ -271,6 +276,7 @@ function create_K2510_interfaces(){
                     <span class="slider"> </span>
                     </label>
                 </div>
+
                 <div>
                     <label class = "switch-label" for = "identify-toggle-${id}">
                     <p>Identify</p>
@@ -280,6 +286,7 @@ function create_K2510_interfaces(){
                     <span class="slider"> </span>
                     </label>
                 </div>
+
                 <div>
                     <button onclick="set_over_temp('${id}')" id="reset-temp-${id}">Reset over_temp state</button>
                 </div>

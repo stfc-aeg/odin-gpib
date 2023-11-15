@@ -27,7 +27,6 @@ class K2510(GpibDevice):
         self.device_control_enable = True
         self.output_state = False
         self.temp_over_state = False
-        self.identify = False
         self.write(':DISP:WINDOW1:TEXT:STAT 0')
         self.write(':DISP:WINDOW2:TEXT:STAT 0')
 
@@ -61,7 +60,6 @@ class K2510(GpibDevice):
             'device_control_state': (lambda: self.device_control_enable, self.set_control_enable),
             'temp_over_state': (lambda: self.temp_over_state, self.set_temp_over_state),
             'identify': (lambda: self.identify, self.set_identify),
-            #'identify': (lambda: self.identify, GpibDevice.set_identify(GpibDevice, device=self, identify=self.identify)),
             'type': (lambda: self.type, None),
             'ident': (lambda: self.ident, None),
             'address': (lambda: self.bus_address, None),
@@ -71,23 +69,6 @@ class K2510(GpibDevice):
 
     def set_temp_over_state(self, temp_state):
         self.temp_over_state = temp_state
-
-    def set_identify(self, identify):
-        self.identify = identify
-        #ident = self.ident
-        # If identify toggle turned on, display the identify message on the screen.
-        # To do this, message state needs to be turned on.
-        # Max character length for top display message = 12 characters
-        # Max character length for bottom display message = 32 characters
-        if (self.identify == True):
-            self.write(':DISP:WINDOW1:TEXT:DATA "Identify"')
-            self.write(':DISP:WINDOW1:TEXT:STAT 1')
-            self.write(':DISP:WINDOW2:TEXT:DATA "Bottom Text - Yay"')
-            self.write(':DISP:WINDOW2:TEXT:STAT 1')
-        # Else, disable the message state to remove the message
-        else:
-            self.write(':DISP:WINDOW1:TEXT:STAT 0')
-            self.write(':DISP:WINDOW2:TEXT:STAT 0')
 
     def get_tec_volt_lim(self):
         volt_lim = (self.query_ascii_values(':SOUR:VOLT:PROT?'))
