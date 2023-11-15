@@ -68,7 +68,7 @@ function create_K2410_interfaces(){
 
                 <div>
                     <label class = "switch-label" for = "enable-toggle-${id}">
-                    <p>Enable control&nbsp&nbsp</p>
+                    <p>Enable control</p>
                     </label>
                     <label class = "switch">
                     <input type="checkbox" onclick="set_enable_k2410('${id}')" id="enable-toggle-${id}">
@@ -78,7 +78,7 @@ function create_K2410_interfaces(){
 
                 <div>
                     <label class = "switch-label" for = "output-toggle-${id}">
-                    <p>Enable output&nbsp&nbsp&nbsp</p>
+                    <p>Enable output</p>
                     </label>
                     <label class = "switch">
                     <input class type="checkbox" onclick="set_output_k2410('${id}')" id="output-toggle-${id}">

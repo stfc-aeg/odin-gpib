@@ -107,6 +107,7 @@ position: relative;
 .switch-label
 {
 padding-bottom: 15px;
+width: 110px;
 }
 
 .slider
