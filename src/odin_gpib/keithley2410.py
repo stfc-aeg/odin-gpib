@@ -32,8 +32,9 @@ class K2410(GpibDevice):
 
         self.device_control_enable = True
         self.ramping_flag = False
-        self.write(':DISP:WINDOW1:TEXT:STAT 0')
-        self.write(':DISP:WINDOW2:TEXT:STAT 0')
+
+        # Reset the display text, in case identify message was left on
+        self.set_identify(False)
 
         self.filter_set_enable = ""
         self.filter_set_type = ""

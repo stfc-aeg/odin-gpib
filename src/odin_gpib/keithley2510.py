@@ -27,8 +27,9 @@ class K2510(GpibDevice):
         self.device_control_enable = True
         self.output_state = False
         self.temp_over_state = False
-        self.write(':DISP:WINDOW1:TEXT:STAT 0')
-        self.write(':DISP:WINDOW2:TEXT:STAT 0')
+
+        # Reset the display text, in case identify message was left on
+        self.set_identify(False)
 
         #Make outp? check function in gpibdevice class
         output_init_state = self.device.query(':OUTP?')
