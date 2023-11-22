@@ -579,10 +579,11 @@ function set_enable_k2510(id){
     ajax_put(id,'device_control_state',enabled)
 }
 
-// Obtains the entered voltage level value, multiplies it by the checked
-// polarity to make it positive or negative, performs validation and
-// sends it to the adapter program if it meets the input criteria 
-function set_voltage_level(element_id,id){
+// Obtains the entered voltage level value, strips it of any entered dash,
+// multiplies it by the checked polarity to make it positive or negative,
+// performs validation and then sends it to the adapter program
+// if it meets the input criteria
+function set_voltage_level(element_id, id) {
     var v_input_box = (document.getElementById(element_id));
     var regexVolt = /^-?\d+(\.\d{1,3})?$/;
     var polarity;
@@ -595,12 +596,16 @@ function set_voltage_level(element_id,id){
         polarity = parseFloat(document.getElementById('check-negative').value);
     }
 
-    if (regexVolt.test(v_input_box.value)){
+    if (regexVolt.test(v_input_box.value)) {
         $.getJSON('/api/' + api_version + '/gpib/devices/' + id + '/voltage', function(response) {
-        voltage_validation_check(v_input_box,response.voltage.voltage_curr_range)
-    // The input voltage value is multiplied by polarity to produce a positive or negative value
-    var voltage = ((parseFloat(document.getElementById('volt-set-level-'+id).value))*polarity);
-    ajax_put(id+'/voltage','voltage_set',voltage) });        
+            voltage_validation_check(v_input_box, response.voltage.voltage_curr_range)
+            // The input voltage is first stripped of any dash that might be in the input.
+            // It is then multiplied by polarity to produce a positive or negative value.
+            var input_voltage = document.getElementById('volt-set-level-' + id).value;
+            input_voltage = input_voltage.replace("-", "");
+            var signed_voltage = ((parseFloat(input_voltage)) * polarity);
+            ajax_put(id + '/voltage', 'voltage_set', signed_voltage)
+        });
     } else {
         v_input_box.value = "";
     }
