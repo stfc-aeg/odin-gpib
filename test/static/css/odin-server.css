@@ -110,6 +110,19 @@ padding-bottom: 15px;
 width: 110px;
 }
 
+input[type=radio] {
+  width: 15px;
+  margin: 4px 0px 0px 10px;
+}
+
+label#voltage-polarity-check-label {
+  margin: 4px 10px 0px 0px;
+}
+
+input#vl_set-K2410_27 {
+  margin-left: 10px;
+}
+
 .slider
 {
 position: absolute;
