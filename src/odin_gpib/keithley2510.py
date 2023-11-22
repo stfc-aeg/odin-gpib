@@ -28,6 +28,9 @@ class K2510(GpibDevice):
         self.output_state = False
         self.temp_over_state = False
 
+        # Reset the display text, in case identify message was left on
+        self.set_identify(False)
+
         #Make outp? check function in gpibdevice class
         output_init_state = self.device.query(':OUTP?')
         if ("1" in output_init_state):
@@ -57,6 +60,7 @@ class K2510(GpibDevice):
             'output_state': (lambda: self.output_state, self.set_output_state),
             'device_control_state': (lambda: self.device_control_enable, self.set_control_enable),
             'temp_over_state': (lambda: self.temp_over_state, self.set_temp_over_state),
+            'identify': (lambda: self.identify, self.set_identify),
             'type': (lambda: self.type, None),
             'ident': (lambda: self.ident, None),
             'address': (lambda: self.bus_address, None),
@@ -65,14 +69,14 @@ class K2510(GpibDevice):
         })
 
     def set_temp_over_state(self, temp_state):
-        self.temp_over_state = temp_state 
+        self.temp_over_state = temp_state
 
     def get_tec_volt_lim(self):
         volt_lim = (self.query_ascii_values(':SOUR:VOLT:PROT?'))
         if (volt_lim == None):
             pass
         else:
-            self.tec_volt_lim = ("{:.6f}".format(float(volt_lim[0])))    
+            self.tec_volt_lim = ("{:.6f}".format(float(volt_lim[0])))
 
     def get_tec_curr_lim(self):
         curr_lim = (self.query_ascii_values(':SENS:CURR:PROT?'))
@@ -80,7 +84,6 @@ class K2510(GpibDevice):
             pass
         else:
             self.tec_curr_lim = ("{:.6f}".format(float(curr_lim[0])))
-        
 
     def get_tec_power(self):
         tec_power = (self.query_ascii_values(':MEAS:POW?'))
@@ -94,14 +97,14 @@ class K2510(GpibDevice):
         if (tec_current == None):
             pass
         else:
-            self.tec_current = ("{:.6f}".format(float(tec_current[0])))        
+            self.tec_current = ("{:.6f}".format(float(tec_current[0])))
 
     def get_tec_voltage(self):
         tec_voltage = (self.query_ascii_values(':MEAS:VOLT?'))
         if (tec_voltage == None):
             pass
         else:
-            self.tec_voltage = ("{:.6f}".format(float(tec_voltage[0])))        
+            self.tec_voltage = ("{:.6f}".format(float(tec_voltage[0])))
 
     def get_tec_temp_meas(self):
         tec_temp_meas = (self.query_ascii_values(':MEAS:TEMP?'))
@@ -115,14 +118,14 @@ class K2510(GpibDevice):
                 self.output_state = False
                 self.write(':OUTP OFF')
             else:
-                logging.debug("Under temp")    
-    
+                logging.debug("Under temp")
+
     def get_tec_setpoint(self):
         tec_setpoint = (self.query_ascii_values(':SOUR:TEMP?'))
         if (tec_setpoint == None):
             pass
         else:
-            self.tec_setpoint = ("{:.6f}".format(float(tec_setpoint[0])))        
+            self.tec_setpoint = ("{:.6f}".format(float(tec_setpoint[0])))
 
     def get_output_state(self):
         output_state = self.query(':OUTP?')
