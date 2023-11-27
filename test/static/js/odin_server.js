@@ -174,6 +174,14 @@ function create_K2410_interfaces(){
                     <form>
                         <label for ="volt-set-level-${id}"> Voltage: </label>
                         <input id="volt-set-level-${id}" type="text"/>
+                        <label id="voltage-polarity-check-label">
+                            <input type="radio" id="check-positive" name="check-polarity" value="1" checked="checked">
+                            +
+                        </label>
+                        <label id="voltage-polarity-check-label">
+                            <input type="radio" id="check-negative" name="check-polarity" value="-1">
+                            -
+                        </label>
                         <input type = "button" id="vl_set-${id}" value="Set" onclick="set_voltage_level('volt-set-level-${id}','${id}')" />
                     </form>
                 </td>
@@ -571,17 +579,33 @@ function set_enable_k2510(id){
     ajax_put(id,'device_control_state',enabled)
 }
 
-//Obtains the entered voltage level value, performs validation and sends it to the 
-//adapter program if it meets the input criteria 
-function set_voltage_level(element_id,id){
-    var v_input_box = (document.getElementById(element_id))
+// Obtains the entered voltage level value, strips it of any entered dash,
+// multiplies it by the checked polarity to make it positive or negative,
+// performs validation and then sends it to the adapter program
+// if it meets the input criteria
+function set_voltage_level(element_id, id) {
+    var v_input_box = (document.getElementById(element_id));
     var regexVolt = /^-?\d+(\.\d{1,3})?$/;
+    var polarity;
 
-    if (regexVolt.test(v_input_box.value)){
+    // Set polarity to +1 or -1 depending on which radio button is checked
+    if (document.getElementById('check-positive').checked) {
+        polarity = parseFloat(document.getElementById('check-positive').value);
+    }
+    if (document.getElementById('check-negative').checked) {
+        polarity = parseFloat(document.getElementById('check-negative').value);
+    }
+
+    if (regexVolt.test(v_input_box.value)) {
         $.getJSON('/api/' + api_version + '/gpib/devices/' + id + '/voltage', function(response) {
-        voltage_validation_check(v_input_box,response.voltage.voltage_curr_range)
-    var voltage = parseFloat(document.getElementById('volt-set-level-'+id).value);
-    ajax_put(id+'/voltage','voltage_set',voltage) });        
+            voltage_validation_check(v_input_box, response.voltage.voltage_curr_range)
+            // The input voltage is first stripped of any dash that might be in the input.
+            // It is then multiplied by polarity to produce a positive or negative value.
+            var input_voltage = document.getElementById('volt-set-level-' + id).value;
+            input_voltage = input_voltage.replace("-", "");
+            var signed_voltage = ((parseFloat(input_voltage)) * polarity);
+            ajax_put(id + '/voltage', 'voltage_set', signed_voltage)
+        });
     } else {
         v_input_box.value = "";
     }
