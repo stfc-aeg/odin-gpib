@@ -71,40 +71,12 @@ class K2510(GpibDevice):
     def set_temp_over_state(self, temp_state):
         self.temp_over_state = temp_state
 
-    def get_tec_volt_lim(self):
-        volt_lim = (self.query_ascii_values(':SOUR:VOLT:PROT?'))
-        if (volt_lim == None):
+    def get_request(self, tec_parameter, device_query):
+        values = (self.query_ascii_values(device_query))
+        if (values == None):
             pass
         else:
-            self.tec_volt_lim = ("{:.6f}".format(float(volt_lim[0])))
-
-    def get_tec_curr_lim(self):
-        curr_lim = (self.query_ascii_values(':SENS:CURR:PROT?'))
-        if (curr_lim == None):
-            pass
-        else:
-            self.tec_curr_lim = ("{:.6f}".format(float(curr_lim[0])))
-
-    def get_tec_power(self):
-        tec_power = (self.query_ascii_values(':MEAS:POW?'))
-        if (tec_power == None):
-            pass
-        else:
-            self.tec_power = ("{:.6f}".format(float(tec_power[0])))
-
-    def get_tec_current(self):
-        tec_current = (self.query_ascii_values(':MEAS:CURR?'))
-        if (tec_current == None):
-            pass
-        else:
-            self.tec_current = ("{:.6f}".format(float(tec_current[0])))
-
-    def get_tec_voltage(self):
-        tec_voltage = (self.query_ascii_values(':MEAS:VOLT?'))
-        if (tec_voltage == None):
-            pass
-        else:
-            self.tec_voltage = ("{:.6f}".format(float(tec_voltage[0])))
+            setattr(self, tec_parameter, ("{:.6f}".format(float(values[0]))))
 
     def get_tec_temp_meas(self):
         tec_temp_meas = (self.query_ascii_values(':MEAS:TEMP?'))
@@ -119,13 +91,6 @@ class K2510(GpibDevice):
                 self.write(':OUTP OFF')
             else:
                 logging.debug("Under temp")
-
-    def get_tec_setpoint(self):
-        tec_setpoint = (self.query_ascii_values(':SOUR:TEMP?'))
-        if (tec_setpoint == None):
-            pass
-        else:
-            self.tec_setpoint = ("{:.6f}".format(float(tec_setpoint[0])))
 
     def get_output_state(self):
         output_state = self.query(':OUTP?')
@@ -174,10 +139,10 @@ class K2510(GpibDevice):
         if ((self.device_control_enable) and not(self.temp_over_state)):
             logging.debug("Updating k2510")
             self.get_output_state()
-            self.get_tec_voltage()
-            self.get_tec_current()
-            self.get_tec_power()
+            self.get_request("tec_voltage", ':MEAS:VOLT?')
+            self.get_request("tec_current", ':MEAS:CURR?')
+            self.get_request("tec_power", ':MEAS:POW?')
             self.get_tec_temp_meas()
-            self.get_tec_setpoint()
-            self.get_tec_volt_lim()
-            self.get_tec_curr_lim()
+            self.get_request("tec_setpoint", ':SOUR:TEMP?')
+            self.get_request("tec_volt_lim", ':SOUR:VOLT:PROT?')
+            self.get_request("tec_curr_lim", ':SENS:CURR:PROT?')
