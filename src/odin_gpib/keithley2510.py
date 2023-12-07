@@ -76,15 +76,15 @@ class K2510(GpibDevice):
         if (values == None):
             pass
         else:
-            setattr(self, tec_parameter, ("{:.6f}".format(float(values[0]))))
+            setattr(self, tec_parameter, float(values[0]))
 
     def get_tec_temp_meas(self):
         tec_temp_meas = (self.query_ascii_values(':MEAS:TEMP?'))
         if (tec_temp_meas == None):
             pass
         else:
-            self.tec_temp_meas = ("{:.6f}".format(float(tec_temp_meas[0])))
-            if (float(self.tec_temp_meas) > 40):
+            self.tec_temp_meas = float(tec_temp_meas[0])
+            if self.tec_temp_meas > 40:
                 logging.debug("Over temp")
                 self.temp_over_state = True
                 self.output_state = False

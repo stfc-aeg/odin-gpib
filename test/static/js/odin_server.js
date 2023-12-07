@@ -565,11 +565,11 @@ function update_k2510_elements(id) {
             for(x in K2510_input_list){
                 document.getElementById(K2510_input_list[x]+id).disabled = false;
             }
-            $("#tec-power-meas-"+id).html((parseFloat(response[id].info.tec_power).toFixed(3)));
-            $("#curr-temp-meas-"+id).html((parseFloat(response[id].info.tec_temp_meas).toFixed(3)));
-            $("#tec-volt-meas-"+id).html((parseFloat(response[id].info.tec_voltage).toFixed(3)));
-            $("#tec-current-meas-"+id).html((parseFloat(response[id].info.tec_current).toFixed(3)));
-            $("#tec-set-point-"+id).html((parseFloat(response[id].info.tec_setpoint).toFixed(3)));
+            $("#tec-power-meas-"+id).html((response[id].info.tec_power).toFixed(3));
+            $("#curr-temp-meas-"+id).html((response[id].info.tec_temp_meas).toFixed(3));
+            $("#tec-volt-meas-"+id).html((response[id].info.tec_voltage).toFixed(3));
+            $("#tec-current-meas-"+id).html((response[id].info.tec_current).toFixed(3));
+            $("#tec-set-point-"+id).html((response[id].info.tec_setpoint).toFixed(3));
         }
     }
 }
