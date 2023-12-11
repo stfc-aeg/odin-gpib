@@ -94,8 +94,22 @@ class K2410(GpibDevice):
     def set_time(self, time):
         self.voltage_time = time
 
-    def set_ramping_flag(self,flag):
+    def set_ramping_flag(self, flag):
         self.ramping_flag = flag
+
+    def get_request(self, parameter, device_query):
+        values = (self.query(device_query))
+        if (values == None):
+            pass
+        else:
+            setattr(self, parameter, values)
+
+    def get_array_request(self, parameter, device_query, index):
+        values = (self.query_ascii_values(device_query))
+        if (values == None):
+            pass
+        else:
+            setattr(self, parameter, (values[index]))
 
     def get_output_state(self):
         output_state = self.query(':OUTP?')
@@ -122,20 +136,6 @@ class K2410(GpibDevice):
         if (self.device_control_enable == False):
             self.write(':SYSTEM:KEY 23')
 
-    def get_voltage_measurement(self):
-        voltage_meas = (self.query_ascii_values(':MEAS:VOLT?'))
-        if (voltage_meas == None):
-            pass
-        else:
-            self.voltage_meas = (voltage_meas[0])
-
-    def get_voltage_range(self):
-        voltage_curr_range = (self.query((':SOUR:VOLT:RANG?')))
-        if (voltage_curr_range == None):
-            pass
-        else:
-            self.voltage_curr_range = voltage_curr_range
-
     def get_filter_state(self):
         filter_curr_state = (self.query(':SENS:AVER:STAT?'))
         if (filter_curr_state == None):
@@ -147,13 +147,6 @@ class K2410(GpibDevice):
                 self.filter_curr_state = "Disabled"
             else: 
                 pass
-
-    def get_filter_curr_count(self):
-        filter_curr_count = (self.query(':SENS:AVER:COUN?'))
-        if (filter_curr_count == None):
-            pass
-        else:
-            self.filter_curr_count = filter_curr_count
 
     def get_filter_curr_type(self):
         filter_curr_type = (self.query(':SENS:AVER:TCON?'))
@@ -167,20 +160,6 @@ class K2410(GpibDevice):
                 self.filter_curr_type = "Repeating"
             else: 
                 pass
-
-    def get_current_measurement(self):
-        current_meas = (self.query_ascii_values(':MEAS:CURR?'))
-        if (current_meas == None):
-            pass
-        else:
-            self.current_meas = (current_meas[1])
-
-    def get_current_comp(self):
-        current_curr_comp = (self.query_ascii_values(':SENS:CURR:PROT?'))
-        if (current_curr_comp == None):
-            pass
-        else:
-            self.current_curr_comp = current_curr_comp
 
     def set_current_comp(self, curr_comp_setpoint):
         curr_comp_setpoint = str(curr_comp_setpoint)
@@ -218,14 +197,14 @@ class K2410(GpibDevice):
         self.get_output_state()
         if (self.output_state) and (self.device_control_enable):
             self.get_filter_state()
-            self.get_filter_curr_count()
+            self.get_request("filter_curr_count", ':SENS:AVER:COUN?')
             self.get_filter_curr_type()
 
-            self.get_voltage_measurement()
-            self.get_voltage_range()
+            self.get_array_request("voltage_meas", ':MEAS:VOLT?', 0)
+            self.get_request("voltage_curr_range", ':SOUR:VOLT:RANG?')
 
-            self.get_current_comp()
-            self.get_current_measurement()
+            self.get_request("current_curr_comp", ':SENS:CURR:PROT?')
+            self.get_array_request("current_meas", ':MEAS:CURR?', 1)
 
     @run_on_executor
     def set_ramp_voltage(self, voltage_setpoint):
