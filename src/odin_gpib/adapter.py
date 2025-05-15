@@ -14,8 +14,8 @@ import threading
 from concurrent import futures
 from contextlib import contextmanager
 
-logging.getLogger('pyvisa').setLevel(logging.ERROR)  # or logging.ERROR for even less output
-logging.getLogger('gpib').setLevel(logging.ERROR)
+logging.getLogger('pyvisa').setLevel(logging.ERROR) # Hide debug spam of searching for all gpib boards
+logging.getLogger('gpib').setLevel(logging.ERROR) # Hide debug spam of searching for all gpib boards
 
 from tornado.concurrent import run_on_executor
 from tornado.escape import json_decode
@@ -132,7 +132,10 @@ class GpibManager():
             os.close(original_stderr_fd)
 
     def initialise_devices(self, *args):
-        """Function to establish connection with the  """
+        """ 
+        Function to establish state of GPIB readiness, and build device trees 
+        for any connected devices. 
+        """
         # If a resource manager is already open try to close it
         try:
             if self.resources:
@@ -192,8 +195,7 @@ class GpibManager():
                 device_name = device.type + '_' + str(device.bus_address)
                 self.devices[device_name] = device
 
-        """ Parameter tree that holds information about the detected devices"""
-
+        # Parameter tree that holds information about the detected devices
         self.param_tree = ParameterTree({
             'driver_available': (lambda: self.driver_available, None),
             'device_available': (lambda: self.device_available, None),
@@ -250,7 +252,6 @@ class GpibManager():
 
     def stop_background_task(self):
         """ Disables the background task by altering its control variable """
-
         self.background_task_enable = False
 
     @run_on_executor
@@ -263,10 +264,5 @@ class GpibManager():
                 for device in self.devices.values():
                     if (device.ret_control_state()):
                         device.update()
-
-                    #print(device.ret_control_state)
-                    
-
-                """ Controls the speed of the background task calls """
                 time.sleep(1)
                 
