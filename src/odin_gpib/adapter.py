@@ -5,18 +5,23 @@ from concurrent.futures import thread
 from odin_gpib.keithley2410 import K2410 
 from odin_gpib.keithley2510 import K2510
 
+import os
 import time
 import pyvisa
 import logging
+import warnings
 import threading
 from concurrent import futures
+from contextlib import contextmanager
+
+logging.getLogger('pyvisa').setLevel(logging.ERROR)  # or logging.ERROR for even less output
+logging.getLogger('gpib').setLevel(logging.ERROR)
 
 from tornado.concurrent import run_on_executor
 from tornado.escape import json_decode
 
 from odin.adapters.adapter import ApiAdapter, ApiAdapterResponse, request_types, response_types
 from odin.adapters.parameter_tree import ParameterTree, ParameterTreeError
-
 
 
 class GpibAdapter(ApiAdapter):
@@ -42,15 +47,13 @@ class GpibAdapter(ApiAdapter):
         return ApiAdapterResponse(response, content_type=content_type, 
                                     status_code=status_code)
 
-    @request_types('application/json')
+
+    @request_types('application/json',"application/vnd.odin-native")
     @response_types('application/json', default='application/json')
     def put(self, path, request):
-
         content_type = 'application/json'
-
         try:
             data = json_decode(request.body)
-            logging.debug(data)
             self.gpibmanager.set(path, data)
             response = self.gpibmanager.get(path)
             status_code = 200
@@ -61,10 +64,8 @@ class GpibAdapter(ApiAdapter):
             response = {'error': 'Failed to decode PUT request body: {}'.format(str(e))}
             status_code = 400
 
-        logging.debug(response)
+        return ApiAdapterResponse(response, content_type=content_type, status_code=status_code)
 
-        return ApiAdapterResponse(response, content_type=content_type, 
-                                    status_code=status_code)
 
     def delete(self, path, request):
         response = 'GpibAdapter: DELETE on path {}'.format(path)
@@ -92,11 +93,79 @@ class GpibManager():
 
         """ Initalises the pyvisa resource manager to get a connection
         to the GPIB controller """
-
         self.lock = threading.Lock()
+        self.driver_available = False
+        self.device_available = False
+        self.resources = None
+        self.resource_list = None
 
-        self.resources = pyvisa.ResourceManager('@py')
-        self.resource_list=(self.resources.list_resources())
+        self.param_tree = None
+
+        self.initialise_devices()
+
+        self.remote_mode_enable = 1
+        self.background_task_enable = 1 if self.device_available else 0
+        
+        if self.background_task_enable:
+            self.start_background_task()
+
+    @contextmanager
+    def suppress_stderr_output(self):
+        """
+        Context manager that temporarily redirects stderr to /dev/null, for suppressing 
+        C library error messages cannot be controlled by pythons logging level settings
+        by writing directly to stderr file descriptor.
+        
+        Returns:
+            None: Yields control back to the calling context with stderr redirected
+        """
+        original_stderr_fd = os.dup(2)  # Make a copy of the original stderr file descriptor
+        null_device_fd = os.open(os.devnull, os.O_WRONLY)  # Open /dev/null for writing
+        
+        try:
+            os.dup2(null_device_fd, 2)  # Redirect stderr to /dev/null
+            os.close(null_device_fd)  # Close the duplicate
+            yield  # Give control back to the with-block
+        finally:
+            # Restore original stderr even if exceptions occur
+            os.dup2(original_stderr_fd, 2)
+            os.close(original_stderr_fd)
+
+    def initialise_devices(self, *args):
+        """Function to establish connection with the  """
+        # If a resource manager is already open try to close it
+        try:
+            if self.resources:
+                self.resources.close()
+                logging.debug("Closed resource manager")
+        except:
+            logging.error(f"Could not close resource: {self.resource}")
+
+        # Supress the libgpib error messages for probing addresses.
+        with self.suppress_stderr_output():
+            # Check GPIB driver is installed
+            with warnings.catch_warnings(record=True) as wrn:
+                warnings.simplefilter("always")
+
+                # try to open the resource manager, and contact the gpib driver
+                self.resources = pyvisa.ResourceManager("@py")
+                self.resource_list = self.resources.list_resources()
+                self.driver_available = True
+
+                # check for specific warning message from gpib library
+                if any("GPIB library not found" in str(w.message) for w in wrn):
+                    logging.error("GPIB driver not available")
+                    self.resource_list = []
+                    self.driver_available = False              
+
+            # Check NI-USB-GPIB is available
+            if self.driver_available:
+                try:
+                    intf = self.resources.open_resource("GPIB0::INTFC")
+                    intf.close()
+                    self.device_available = True
+                except Exception as e:
+                    logging.error("GPIB interface not available")
 
         #empty dictionary of devices
         self.devices = {}
@@ -111,11 +180,11 @@ class GpibManager():
 
             device_cls = None    
             if "MODEL 2410" in self.ident:
-                logging.debug("model 2410 check")
+                logging.debug("model 2410 Detected")
                 device_cls = K2410
 
             if "MODEL 2510" in self.ident:
-                logging.debug("model 2510 check")
+                logging.debug("model 2510 Detected")
                 device_cls = K2510
 
             if device_cls:
@@ -126,22 +195,13 @@ class GpibManager():
         """ Parameter tree that holds information about the detected devices"""
 
         self.param_tree = ParameterTree({
+            'driver_available': (lambda: self.driver_available, None),
+            'device_available': (lambda: self.device_available, None),
             'num_devices': (lambda: len(self.devices), None),
             'device_ids': (lambda: [id for id in self.devices.keys()], None),
-            'devices': {name: device.param_tree for name, device in self.devices.items()}
+            'devices': {name: device.param_tree for name, device in self.devices.items()},
+            'refresh_devices': (lambda: None, lambda value: self.initialise_devices(value))
         })
-
-
-
-        """ Setting inital values for variables"""
- 
-        self.remote_mode_enable = 1
-        self.background_task_enable =1
-        
-        if self.background_task_enable:
-            self.start_background_task()
-
-        ####    END OF INIT    ####    
 
     def get(self, path):
         """Get the parameter tree. """ 
@@ -196,12 +256,11 @@ class GpibManager():
     @run_on_executor
     def background_task(self):        
         """ Runs the update function of all the loaded devices """
-
+        logging.info("Background Task Running")
         while self.background_task_enable:
             if self.remote_mode_enable:
                             
                 for device in self.devices.values():
-                    logging.debug("LOOPING" + str(device.ret_control_state()))
                     if (device.ret_control_state()):
                         device.update()
 

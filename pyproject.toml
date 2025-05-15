@@ -1,0 +1,30 @@
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "odin-gpib"
+description = "ODIN GPIB device integration"
+authors = [
+    {name = "Josh Harris", email = "josh.harris@stfc.ac.uk"},
+]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "License :: OSI Approved :: Apache Software License",
+    "Programming Language :: Python :: 3.10",
+]
+dynamic = ["version"]
+requires-python = ">=3.10"
+
+dependencies = [
+    "pyvisa==1.12.0",
+    "pyvisa-py==0.5.3",
+    "gpib-ctypes==0.3.0",
+    "odin-control @ git+https://git@github.com/odin-detector/odin-control.git@1.5.0"
+]
+
+[project.urls]
+GitHub = "https://github.com/stfc-aeg/odin-gpib"
+
+[tool.setuptools.packages.find]
+where = ["src"]

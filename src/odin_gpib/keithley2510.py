@@ -38,8 +38,6 @@ class K2510(GpibDevice):
         if ("0" in output_init_state):
             self.output_state = False
         
-        print("OUTPUT: ",self.output_state)
-
         setpoints = ParameterTree({
             'c_lim_set': (lambda: self.current_limit, self.set_current_limit),
             'v_lim_set': (lambda: self.voltage_limit, self.set_voltage_limit),
@@ -89,8 +87,6 @@ class K2510(GpibDevice):
                 self.temp_over_state = True
                 self.output_state = False
                 self.write(':OUTP OFF')
-            else:
-                logging.debug("Under temp")
 
     def get_output_state(self):
         output_state = self.query(':OUTP?')

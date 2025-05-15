@@ -77,7 +77,6 @@ class GpibDevice():
 
 
     def query_ascii_values(self, cmd):
-        print(self.bus_address,": Last Error: ",self.last_error," | No of Errors: ",self.error_count)
         if self.device_control_enable:
             try:
                 with self.lock:
