@@ -22,6 +22,7 @@ from tornado.escape import json_decode
 
 from odin.adapters.adapter import ApiAdapter, ApiAdapterResponse, request_types, response_types
 from odin.adapters.parameter_tree import ParameterTree, ParameterTreeError
+from odin.util import decode_request_body
 
 
 class GpibAdapter(ApiAdapter):
@@ -53,7 +54,7 @@ class GpibAdapter(ApiAdapter):
     def put(self, path, request):
         content_type = 'application/json'
         try:
-            data = json_decode(request.body)
+            data = decode_request_body(request)
             self.gpibmanager.set(path, data)
             response = self.gpibmanager.get(path)
             status_code = 200
