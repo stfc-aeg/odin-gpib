@@ -31,8 +31,7 @@ class GpibAdapter(ApiAdapter):
 
         super(GpibAdapter, self).__init__(**kwargs)
 
-        background_task_enable = bool(self.options.get('background_task_enable'))
-        self.gpibmanager = GpibManager(background_task_enable)
+        self.gpibmanager = GpibManager()
 
     @response_types('application/json', default='application/json')
     def get(self, path, request):
@@ -90,7 +89,7 @@ class GpibManager():
 
     executor = futures.ThreadPoolExecutor(max_workers=1)
 
-    def __init__(self, background_task_enable):
+    def __init__(self):
 
         """ Initalises the pyvisa resource manager to get a connection
         to the GPIB controller """
